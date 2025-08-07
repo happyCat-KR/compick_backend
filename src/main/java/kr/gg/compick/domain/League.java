@@ -5,18 +5,18 @@ import lombok.*;
 
 @Entity
 @Table(name = "league")
-@Getter @Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class League {
-
     @Id
-    private Integer id;
+    @Column(name = "league_id")
+    private Long leagueId;
 
     @Column(name = "league_name")
     private String leagueName;
 
-    @Column(name = "image_url", length = 500)
+    @Column(name = "image_url")
     private String imageUrl;
 }
