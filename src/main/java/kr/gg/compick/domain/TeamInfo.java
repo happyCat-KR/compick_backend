@@ -2,8 +2,6 @@ package kr.gg.compick.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
-import java.util.*;
 
 // 1. TeamInfo
 @Entity
