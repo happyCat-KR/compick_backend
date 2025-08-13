@@ -4,15 +4,17 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+// kr.gg.compick.config.WebConfig (또는 Security/Cors 설정)
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-
-    // 🔹 CORS 설정 추가
     @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000") // React 개발 서버 주소
+    public void addCorsMappings(CorsRegistry reg) {
+        reg.addMapping("/**")
+                .allowedOriginPatterns("http://localhost:3000", "https://your.app.com")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowCredentials(true);
+                .allowedHeaders("*")
+                //.exposedHeaders("X-New-Access-Token")
+                .allowCredentials(true)
+                .maxAge(3600);
     }
 }
