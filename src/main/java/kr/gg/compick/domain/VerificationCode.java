@@ -36,10 +36,16 @@ public class VerificationCode {
     @Column(nullable = false)
     private LocalDateTime expiresAt;
     private LocalDateTime consumedAt;
+    
+    @Builder.Default
     @Column(name = "attempts", nullable = false)
     private Byte attempts = 0; // Byte는 MySQL TINYINT로 매핑
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    public boolean isExpired() {
+        return expiresAt != null && expiresAt.isBefore(LocalDateTime.now());
+    }
 }
