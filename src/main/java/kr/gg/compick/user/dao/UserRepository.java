@@ -11,7 +11,6 @@ import kr.gg.compick.domain.User;
 public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByUserId(String userId);
     boolean existsByEmail(String email);
-    boolean existsByPhone(String phone);
 
     Optional<User> findByUserId(String userId);
     Optional<User> findByEmail(String email);

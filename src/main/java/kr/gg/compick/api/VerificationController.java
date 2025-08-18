@@ -19,8 +19,8 @@ public class VerificationController {
 
     @PostMapping("/email/send")
     public ResponseEntity<ResponseData> sendEmailVerification(@RequestParam("email") String email){
-        verificationService.sendVerificationCode(email, "signup");
-        return ResponseEntity.ok(ResponseData.success("인증 이메일 발송 완료"));
+        verificationService.sendEmail(email, "signup");
+        return ResponseEntity.ok(ResponseData.success());
     }
 
     @GetMapping("/email/verify")
@@ -28,8 +28,9 @@ public class VerificationController {
                                                     @RequestParam("code") String code) {
         boolean verified = verificationService.verifyCode(email, code, "signup");
         if(verified){
-            return ResponseEntity.ok(ResponseData.success("이메일 인증 성공"));
+            return ResponseEntity.ok(ResponseData.success());
         }
-        return ResponseEntity.badRequest().body(ResponseData.error(400, "이메일 인증 실패"));
+        return ResponseEntity.badRequest().body(ResponseData.error(400, "실패"));
     }
+
 }

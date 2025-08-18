@@ -16,7 +16,8 @@ public class SecurityConfig {
             "/api/user/regist",
             "/api/user/login/nomal",
             "/api/user/check/**",
-            "/api/auth/**"
+            "/api/auth/**",
+            "/*"
     );
 
     @Bean

@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "verification_codes", indexes = {
-        @Index(name = "idx_verif_user_channel", columnList = "user_id, channel"),
         @Index(name = "idx_verif_destination", columnList = "destination"),
         @Index(name = "idx_verif_exp", columnList = "expires_at")
 })
@@ -24,11 +23,8 @@ public class VerificationCode {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_verif_user"))
     private User user; // 가입 전이면 null
-
     @Column(length = 255, nullable = false)
     private String destination;
-    @Column(name = "channel", nullable = false, columnDefinition = "enum('email','phone')")
-    private String channel;
     @Column(name = "purpose", nullable = false, columnDefinition = "enum('signup','login','reset','change')")
     private String purpose;
     @Column(length = 255, nullable = false)

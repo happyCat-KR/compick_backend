@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "`USER`", uniqueConstraints = {
     @UniqueConstraint(name = "uk_user_email", columnNames = "email"),
-    @UniqueConstraint(name = "uk_user_phone", columnNames = "phone"),
     @UniqueConstraint(name = "uk_user_userid", columnNames = "user_id"),
     @UniqueConstraint(name = "uk_user_usernum", columnNames = "user_num")
 }, indexes = @Index(name = "idx_del_user_idx", columnList = "del_user_idx"))
@@ -32,9 +31,6 @@ public class User {
 
   @Column(name = "email", length = 100)
   private String email;
-
-  @Column(name = "phone", length = 30)
-  private String phone;
 
   @Column(name = "password", length = 255)
   private String password;

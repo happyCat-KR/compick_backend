@@ -24,16 +24,12 @@ public class UserService {
             return ResponseData.error(500, "이미 존재하는 이메일입니다.");
         }
 
-        if (userRepository.existsByPhone(userRegistDTO.getPhone())) {
-            return ResponseData.error(500, "이미 존재하는 전화번호입니다.");
-        }
 
         User user = User.builder()
                 .userId(userRegistDTO.getUserId())
                 .password(userRegistDTO.getPassword())
                 .userName(userRegistDTO.getUserName())
                 .email(userRegistDTO.getEmail())
-                .phone(userRegistDTO.getPhone())
                 .build();
 
         userRepository.save(user);
