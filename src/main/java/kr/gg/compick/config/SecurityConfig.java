@@ -14,7 +14,7 @@ public class SecurityConfig {
 
     private static final List<String> PERMIT_URLS = List.of(
             "/api/user/regist",
-            "/api/user/login/nomal",
+            "/api/user/login/normal",
             "/api/user/check/**",
             "/api/auth/**",
             "/*"

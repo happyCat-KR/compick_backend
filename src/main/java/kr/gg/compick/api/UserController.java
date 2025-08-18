@@ -28,7 +28,7 @@ public class UserController {
         return ResponseEntity.ok(res);
     }
 
-    @PostMapping("/login/nomal")
+    @PostMapping("/login/normal")
     public ResponseEntity<ResponseData> loginNomal(@RequestBody LoginDTO loginDTO) {
         // 유저 등록 로직
         // userService.register(userRegistDTO);
