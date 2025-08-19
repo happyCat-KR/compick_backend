@@ -6,6 +6,7 @@ import kr.gg.compick.domain.User;
 import kr.gg.compick.user.dao.UserRepository;
 import kr.gg.compick.user.dto.LoginDTO;
 import kr.gg.compick.user.dto.UserRegistDTO;
+import kr.gg.compick.util.JwtTokenProvider;
 import kr.gg.compick.util.ResponseData;
 import lombok.RequiredArgsConstructor;
 
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
     public ResponseData regist(UserRegistDTO userRegistDTO) {
 
@@ -39,9 +41,15 @@ public class UserService {
 
     public ResponseData loginNomal(LoginDTO loginDTO) {
         return userRepository.findByUserId(loginDTO.getUserId())
-                .map(user -> loginDTO.getPassword().equals(user.getPassword())
-                        ? ResponseData.success("로그인 성공")
-                        : ResponseData.error(401, "비밀번호가 일치하지 않습니다."))
+                .map(user -> {
+                    if(!loginDTO.getPassword().equals(user.getPassword())){
+                        return ResponseData.error(401, "비밀번호가 일치하지 않습니다.");
+                    }
+                    
+                    String token = jwtTokenProvider.generateToken(user.getUserIdx());
+                    return ResponseData.success(token);
+                        
+                })
                 .orElse(ResponseData.error(404, "아이디가 존재하지 않습니다."));
 
     }
