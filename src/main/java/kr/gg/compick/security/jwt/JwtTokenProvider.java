@@ -1,4 +1,4 @@
-package kr.gg.compick.util;
+package kr.gg.compick.security.jwt;
 
 import java.security.Key;
 import java.util.Date;
@@ -23,5 +23,25 @@ public class JwtTokenProvider {
                 .setExpiration(new Date(now.getTime() + accessTokenValidityInMs))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public boolean validateToken(String token){
+        try{
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            return true;
+        } catch (Exception e){
+            return false;
+        }
+    }
+
+    public Long getUserIdxFromToken(String token){
+        return Long.valueOf(
+            Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject()
+        );
     }
 }

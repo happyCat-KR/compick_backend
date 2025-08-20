@@ -3,10 +3,10 @@ package kr.gg.compick.user.service;
 import org.springframework.stereotype.Service;
 
 import kr.gg.compick.domain.User;
+import kr.gg.compick.security.jwt.JwtTokenProvider;
 import kr.gg.compick.user.dao.UserRepository;
 import kr.gg.compick.user.dto.LoginDTO;
 import kr.gg.compick.user.dto.UserRegistDTO;
-import kr.gg.compick.util.JwtTokenProvider;
 import kr.gg.compick.util.ResponseData;
 import lombok.RequiredArgsConstructor;
 
