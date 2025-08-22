@@ -37,6 +37,6 @@ out/
 .vscode/
 
 ### Environment files ###
-application.yml
+application.yaml
 application.properties
 .env
