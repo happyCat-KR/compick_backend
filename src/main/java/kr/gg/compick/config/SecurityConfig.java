@@ -23,8 +23,7 @@ public class SecurityConfig {
             "/api/user/regist",
             "/api/user/login/normal",
             "/api/user/check/**",
-            "/api/auth/**",
-            "/*"
+            "/api/auth/**"
     );
 
     SecurityConfig(JwtTokenProvider jwtTokenProvider, MyUserDetailsService myUserDetailsService) {

@@ -22,8 +22,8 @@ public class User {
   @Column(name = "user_idx")
   private Long userIdx;
 
-  @Column(name = "user_name", length = 30)
-  private String userName;
+  @Column(name = "user_nickname", length = 30)
+  private String userNickname;
 
   @Column(name = "email", length = 100)
   private String email;

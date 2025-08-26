@@ -45,11 +45,16 @@ public class UserController {
         return ResponseEntity.ok(res);
     }
 
+    @GetMapping("/check/nickname")
+    public ResponseEntity<ResponseData> checkNickname(@RequestParam("nickname") String nickname) {
+        ResponseData res = userService.checkNickname(nickname);
+        return ResponseEntity.ok(res);
+    }
+
     @GetMapping("/info")
     public ResponseEntity<ResponseData> info(@AuthenticationPrincipal UserDetailsImpl principal) {
         User user = principal.getUser();
         return ResponseEntity.ok(ResponseData.success(user));
     }
-    
-    
+
 }
