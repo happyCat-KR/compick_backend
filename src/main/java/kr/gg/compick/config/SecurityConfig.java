@@ -27,6 +27,7 @@ public class SecurityConfig {
         "/api/**/matches/**",  // ← 이 줄 추가 필요
         "/api/**/rankings",    // ← 이 줄 추가 필요
         "/*"
+
     );
 
     SecurityConfig(JwtTokenProvider jwtTokenProvider, MyUserDetailsService myUserDetailsService) {
