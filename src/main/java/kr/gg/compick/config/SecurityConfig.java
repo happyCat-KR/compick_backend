@@ -20,11 +20,13 @@ public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
 
     private static final List<String> PERMIT_URLS = List.of(
-            "/api/user/regist",
-            "/api/user/login/normal",
-            "/api/user/check/**",
-            "/api/auth/**",
-            "/*"
+        "/api/user/regist",
+        "/api/user/login/normal",
+        "/api/user/check/**",
+        "/api/auth/**",
+        "/api/**/matches/**",  // ← 이 줄 추가 필요
+        "/api/**/rankings",    // ← 이 줄 추가 필요
+        "/*"
     );
 
     SecurityConfig(JwtTokenProvider jwtTokenProvider, MyUserDetailsService myUserDetailsService) {
