@@ -32,8 +32,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if(bearer != null && bearer.startsWith("Bearer ")){
             token = bearer.substring(7);
         }
-
+        
         if(token != null && tokenProvider.validateToken(token)){
+            System.out.println("hi");
             Long userIdx = tokenProvider.getUserIdxFromToken(token);
             UserDetailsImpl userDetails =
                 (UserDetailsImpl) userDetailsService.loadUserByUsername(String.valueOf(userIdx));

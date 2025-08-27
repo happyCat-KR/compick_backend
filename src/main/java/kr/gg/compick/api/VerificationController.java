@@ -18,7 +18,6 @@ import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
-
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import kr.gg.compick.user.service.UserService;
@@ -37,26 +36,26 @@ public class VerificationController {
     @Value("${kakao.redirect-uri}")
     private String redirectUri;
     @Value("${app.front-base-url}")
-    private String frontBaseUrl;    
+    private String frontBaseUrl;
 
     @PostMapping("/email/send")
-    public ResponseEntity<ResponseData> sendEmailVerification(@RequestParam("email") String email){
+    public ResponseEntity<ResponseData> sendEmailVerification(@RequestParam("email") String email) {
         verificationService.sendEmail(email, "signup");
         return ResponseEntity.ok(ResponseData.success());
     }
 
     @GetMapping("/email/verify")
     public ResponseEntity<ResponseData> verifyEmail(@RequestParam("email") String email,
-                                                    @RequestParam("code") String code) {
+            @RequestParam("code") String code) {
         boolean verified = verificationService.verifyCode(email, code, "signup");
-        if(verified){
+        if (verified) {
             return ResponseEntity.ok(ResponseData.success());
         }
         return ResponseEntity.badRequest().body(ResponseData.error(400, "실패"));
     }
 
     @GetMapping("/signup/kakao")
-    public void beginKakaoSignup(HttpServletResponse res, HttpSession session) throws IOException{
+    public void beginKakaoSignup(HttpServletResponse res, HttpSession session) throws IOException {
 
         // CSRF공격 방지 토큰(인증 과정에서 요청 위변조 여부 확인하는 보안 파라미터)
         String state = UUID.randomUUID().toString();
@@ -76,54 +75,69 @@ public class VerificationController {
 
     @GetMapping("/kakao/callback")
     public void KakaoCallback(
-        @RequestParam("code") String code,
-        @RequestParam("state") String state,
-        HttpServletResponse res,
-        HttpSession session) throws IOException {
+            @RequestParam("code") String code,
+            @RequestParam("state") String state,
+            HttpServletResponse res,
+            HttpSession session) throws IOException {
 
-            String saved = (String) session.getAttribute("OAUTH_STATE");
-            session.removeAttribute("OAUTH_STATE");
-            if (saved == null || !saved.equals(state)) {
-                res.sendError(400, "Invalid state"); return;
-            }
-        
-        TokenRes token = WebClient.create("https://kauth.kakao.com")
-            .post()
-            .uri("/oauth/token")
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-            .body(BodyInserters.fromFormData("grant_type", "authorization_code")
-                .with("client_id", clientId)
-                .with("redirect_uri", redirectUri)
-                .with("code", code)
-            )
-            .retrieve()
-            .onStatus(HttpStatusCode::isError, r -> r.bodyToMono(String.class)
-                .map(body -> new RuntimeException("Kakao token error: " + body)))
-            .bodyToMono(TokenRes.class)
-            .block();
+        String saved = (String) session.getAttribute("OAUTH_STATE");
+        session.removeAttribute("OAUTH_STATE");
+        if (saved == null || !saved.equals(state)) {
+            res.sendError(400, "Invalid state");
+            return;
+        }
+
+        TokenRes kakaoToken = WebClient.create("https://kauth.kakao.com")
+                .post()
+                .uri("/oauth/token")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters.fromFormData("grant_type", "authorization_code")
+                        .with("client_id", clientId)
+                        .with("redirect_uri", redirectUri)
+                        .with("code", code))
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, r -> r.bodyToMono(String.class)
+                        .map(body -> new RuntimeException("Kakao token error: " + body)))
+                .bodyToMono(TokenRes.class)
+                .block();
 
         KakaoMe me = WebClient.create("https://kapi.kakao.com")
-            .get()
-            .uri("/v2/user/me")
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + token.access_token())
-            .retrieve()
-            .onStatus(HttpStatusCode::isError, r -> r.bodyToMono(String.class)
-                .map(body -> new RuntimeException("Kakao me error: " + body)))
-            .bodyToMono(KakaoMe.class)
-            .block();
+                .get()
+                .uri("/v2/user/me")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + kakaoToken.access_token())
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, r -> r.bodyToMono(String.class)
+                        .map(body -> new RuntimeException("Kakao me error: " + body)))
+                .bodyToMono(KakaoMe.class)
+                .block();
 
         String providerUserId = me.id().toString();
         String email = me.kakao_account() != null ? me.kakao_account().email() : null;
 
         ResponseData responseData = userService.kakaoSignup(email, providerUserId, "kakao");
 
-        res.sendRedirect(frontBaseUrl);
+        String targetPath = (responseData.getCode() == 200) ? "/" : "/signup";
+
+        UriComponentsBuilder b = UriComponentsBuilder
+                .fromUriString(frontBaseUrl + targetPath)
+                .queryParam("code", responseData.getCode());
+
+        if (responseData.getCode() == 200 && responseData.getData() != null) {
+            String token = (String) responseData.getData();
+            b.fragment("token=" + java.net.URLEncoder.encode(token, java.nio.charset.StandardCharsets.UTF_8));
+        }
+        String url = b.build(true).toUriString();
+        res.sendRedirect(url);
 
     }
-    
 
 }
 
-record TokenRes(String access_token) {}
-record KakaoMe(Long id, KakaoAccount kakao_account) {}
-record KakaoAccount(String email) {}
+record TokenRes(String access_token) {
+}
+
+record KakaoMe(Long id, KakaoAccount kakao_account) {
+}
+
+record KakaoAccount(String email) {
+}

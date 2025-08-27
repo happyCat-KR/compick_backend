@@ -1,5 +1,6 @@
 package kr.gg.compick.user.service;
 
+import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -25,15 +26,14 @@ public class UserService {
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public String generateUnique(int maxTries){
-        for(int i = 0; i < maxTries; i++){
+    public String generateUnique(int maxTries) {
+        for (int i = 0; i < maxTries; i++) {
             String nick = NicknameGenerator.normalize(NicknameGenerator.candidate());
-            if(!userRepository.existsByUserNickname(nick)) return nick;
+            if (!userRepository.existsByUserNickname(nick))
+                return nick;
         }
         return "사용자" + (100000 + ThreadLocalRandom.current().nextInt(900000));
     }
-
-
 
     @Transactional
     public ResponseData regist(UserRegistDTO userRegistDTO) {
@@ -65,12 +65,17 @@ public class UserService {
     @Transactional
     public ResponseData kakaoSignup(String email, String providerUserId, String provider) {
         UserOauthId id = new UserOauthId(provider, providerUserId);
-        if (userOauthRepository.existsById(id)) {
-            return ResponseData.error(500, "이미 존재하는 소셜 계정입니다.");
+
+        Optional<UserOauth> link = userOauthRepository.findById(id);
+        if (link.isPresent()) {
+            User user = link.get().getUser();
+            String token = jwtTokenProvider.generateToken(user.getUserIdx());
+            return ResponseData.success(token);
         }
         if (userRepository.existsByEmail(email)) {
             return ResponseData.error(500, "이미 존재하는 이메일 입니다.");
         }
+
         String nickname = generateUnique(20);
         User user = userRepository.save(User.builder()
                 .email(email)
@@ -82,7 +87,9 @@ public class UserService {
                     .id(id)
                     .user(user)
                     .build());
-            return ResponseData.success();
+
+            String token = jwtTokenProvider.generateToken(user.getUserIdx());
+            return ResponseData.success(token);
         } catch (DataIntegrityViolationException e) {
             return ResponseData.error(409, "연동 충돌이 발생했습니다.");
 
@@ -113,7 +120,7 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseData checkNickname(String nickname){
+    public ResponseData checkNickname(String nickname) {
         return userRepository.existsByUserNickname(nickname)
                 ? ResponseData.error(500, "이미 존재하는 닉네임입니다.")
                 : ResponseData.success("사용 가능한 닉네임입니다.");
