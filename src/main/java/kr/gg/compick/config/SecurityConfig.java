@@ -20,10 +20,14 @@ public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
 
     private static final List<String> PERMIT_URLS = List.of(
-            "/api/user/regist",
-            "/api/user/login/normal",
-            "/api/user/check/**",
-            "/api/auth/**"
+        "/api/user/regist",
+        "/api/user/login/normal",
+        "/api/user/check/**",
+        "/api/auth/**",
+        "/api/**",
+        // 모든 API 경로 허용
+        "/*"
+
     );
 
     SecurityConfig(JwtTokenProvider jwtTokenProvider, MyUserDetailsService myUserDetailsService) {
@@ -44,7 +48,7 @@ public class SecurityConfig {
                         .requestMatchers(PERMIT_URLS.toArray(new String[0])).permitAll()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(
+                .addFilterBefore(                
                         new JwtAuthenticationFilter(jwtTokenProvider, myUserDetailsService),
                         UsernamePasswordAuthenticationFilter.class
                 );
