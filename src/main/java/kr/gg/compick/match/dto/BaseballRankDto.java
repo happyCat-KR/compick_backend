@@ -6,6 +6,7 @@ import kr.gg.compick.domain.TeamInfo;
 import kr.gg.compick.domain.League;
 import kr.gg.compick.domain.RankBaseball;
 import kr.gg.compick.domain.RankSoccer;
+import kr.gg.compick.match.util.TeamNameMapper;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -43,7 +44,7 @@ public class BaseballRankDto {
                 .leagueName(league.getLeagueName())
                 .season(e.getSeason())
                 .teamId(team.getTeamId())
-                .teamName(team.getTeamName())
+                .teamName(TeamNameMapper.getKoreanName(team.getTeamName()))
                 .teamLogo(team.getImageUrl())
                 .games(e.getGames())
                 .wins(e.getWins())

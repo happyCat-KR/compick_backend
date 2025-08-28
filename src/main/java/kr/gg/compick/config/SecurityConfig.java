@@ -24,8 +24,11 @@ public class SecurityConfig {
         "/api/user/login/normal",
         "/api/user/check/**",
         "/api/auth/**",
-        "/api/**/matches/**",  // ← 이 줄 추가 필요
-        "/api/**/rankings",    // ← 이 줄 추가 필요
+        "/api/**",
+        "/api/home/**",
+        "/api/soccer/epl/**",
+        "/api/soccer/laliga/**",
+        // 모든 API 경로 허용
         "/*"
 
     );
@@ -48,7 +51,7 @@ public class SecurityConfig {
                         .requestMatchers(PERMIT_URLS.toArray(new String[0])).permitAll()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(
+                .addFilterBefore(                
                         new JwtAuthenticationFilter(jwtTokenProvider, myUserDetailsService),
                         UsernamePasswordAuthenticationFilter.class
                 );

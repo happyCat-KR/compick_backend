@@ -23,6 +23,7 @@ public interface MatchCalenderRepository extends JpaRepository<Matches, Long> {
           sp.sport_name                   AS sport,
           l.league_nickname               AS leagueNickname,
           l.league_name                   AS leagueName,
+          l.image_url                     AS leagueLogo,
           th.team_name                    AS homeTeamName,
           th.image_url                    AS homeTeamLogo,
           ta.team_name                    AS awayTeamName,
@@ -63,6 +64,7 @@ public interface MatchCalenderRepository extends JpaRepository<Matches, Long> {
           sp.sport_name                   AS sport,
           l.league_nickname               AS leagueNickname,
           l.league_name                   AS leagueName,
+          l.image_url                     AS leagueLogo,
           th.team_name                    AS homeTeamName,
           th.image_url                    AS homeTeamLogo,
           ta.team_name                    AS awayTeamName,
@@ -99,6 +101,7 @@ public interface MatchCalenderRepository extends JpaRepository<Matches, Long> {
           sp.sport_name          AS sport,
           l.league_nickname      AS leagueNickname,
           l.league_name          AS leagueName,
+          l.image_url            AS leagueLogo,
           th.team_name           AS homeTeamName,
           th.image_url           AS homeTeamLogo,
           ta.team_name           AS awayTeamName,
@@ -129,4 +132,70 @@ public interface MatchCalenderRepository extends JpaRepository<Matches, Long> {
         LocalDateTime start,
         LocalDateTime end
     );
+
+    /**
+     * 홈 화면용: 모든 스포츠와 모든 리그의 경기를 조회
+     * - sport / leagueNickname 도 함께 반환 (프론트 null 방지)
+     */
+    @Query(value = """
+        SELECT
+          ms.match_id                     AS matchId,
+          sp.sport_name                   AS sport,
+          l.league_nickname               AS leagueNickname,
+          l.league_name                   AS leagueName,
+          l.image_url                     AS leagueLogo,
+          th.team_name                    AS homeTeamName,
+          th.image_url                    AS homeTeamLogo,
+          ta.team_name                    AS awayTeamName,
+          ta.image_url                    AS awayTeamLogo,
+          COALESCE(sh.score, 0)           AS homeScore,
+          COALESCE(sa.score, 0)           AS awayScore,
+          ms.start_time                   AS startTime,
+          mc.description                  AS matchStatus
+        FROM matches ms
+        JOIN team_info     th ON ms.home_team_id = th.team_id
+        JOIN team_info     ta ON ms.away_team_id = ta.team_id
+        JOIN league         l ON ms.league_id    = l.league_id
+        JOIN sport         sp ON l.sport_id      = sp.sport_id
+        JOIN match_status  mc ON ms.status_code  = mc.code
+        LEFT JOIN match_score sh ON sh.match_id = ms.match_id AND sh.team_id = ms.home_team_id
+        LEFT JOIN match_score sa ON sa.match_id = ms.match_id AND sa.team_id = ms.away_team_id
+        WHERE ms.start_time >= :start
+          AND ms.start_time <  :end
+        ORDER BY ms.start_time, sp.sport_name, l.league_nickname
+        """, nativeQuery = true)
+    List<MatchCardProjection> findAllMatchesInRange(
+        @Param("start") LocalDateTime start,
+        @Param("end")   LocalDateTime end
+    );
+
+    /**
+     * 경기 ID로 상세 조회 (스포츠/리그 제한 없음)
+     */
+    @Query(value = """
+        SELECT
+          ms.match_id            AS matchId,
+          sp.sport_name          AS sport,
+          l.league_nickname      AS leagueNickname,
+          l.league_name          AS leagueName,
+          l.image_url            AS leagueLogo,
+          th.team_name           AS homeTeamName,
+          th.image_url           AS homeTeamLogo,
+          ta.team_name           AS awayTeamName,
+          ta.image_url           AS awayTeamLogo,
+          COALESCE(sh.score, 0)  AS homeScore,
+          COALESCE(sa.score, 0)  AS awayScore,
+          ms.start_time          AS startTime,
+          mc.description         AS matchStatus
+        FROM matches ms
+        JOIN team_info th        ON ms.home_team_id = th.team_id
+        JOIN team_info ta        ON ms.away_team_id = ta.team_id
+        JOIN league l            ON ms.league_id    = l.league_id
+        JOIN match_status mc     ON ms.status_code  = mc.code
+        JOIN sport sp            ON l.sport_id      = sp.sport_id
+        LEFT JOIN match_score sh ON sh.match_id = ms.match_id AND sh.team_id = ms.home_team_id
+        LEFT JOIN match_score sa ON sa.match_id = ms.match_id AND sa.team_id = ms.away_team_id
+        WHERE ms.match_id = :matchId
+        """, nativeQuery = true)
+    MatchCardProjection findOneCardByMatchId(@Param("matchId") Long matchId);
 }

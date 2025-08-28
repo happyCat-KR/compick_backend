@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import kr.gg.compick.domain.TeamInfo;
 import kr.gg.compick.domain.League;
 import kr.gg.compick.domain.RankSoccer;
+import kr.gg.compick.match.util.TeamNameMapper;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -43,7 +44,7 @@ public class SoccerRankDto {
                 .leagueName(league.getLeagueName())
                 .season(e.getSeason())
                 .teamId(team.getTeamId())
-                .teamName(team.getTeamName())
+                .teamName(TeamNameMapper.getKoreanName(team.getTeamName()))
                 .teamLogo(team.getImageUrl())
                 .playCount(e.getPlayCount())
                 .wins(e.getWins())

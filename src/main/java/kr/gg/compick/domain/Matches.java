@@ -38,6 +38,6 @@ public class Matches {
     private LocalDateTime startTime;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "status_code")
+    @JoinColumn(name = "status_code", referencedColumnName = "code")
     private MatchStatus status;
 }

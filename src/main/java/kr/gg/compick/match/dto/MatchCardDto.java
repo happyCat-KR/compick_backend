@@ -9,6 +9,7 @@ public class MatchCardDto {
     public final String sport;        
     public final String leagueNickname;   
     public final String leagueName;   
+    public final String leagueLogo;   // 리그 이미지 URL 추가
     public final String homeTeamName;
     public final String homeTeamLogo;
     public final int    homeScore;
