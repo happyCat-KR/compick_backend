@@ -25,9 +25,6 @@ public class SecurityConfig {
         "/api/user/check/**",
         "/api/auth/**",
         "/api/**",
-        "/api/home/**",
-        "/api/soccer/epl/**",
-        "/api/soccer/laliga/**",
         // 모든 API 경로 허용
         "/*"
 
