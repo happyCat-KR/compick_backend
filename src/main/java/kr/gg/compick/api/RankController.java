@@ -13,7 +13,6 @@ import kr.gg.compick.match.dto.SoccerRankDto;
 import kr.gg.compick.match.service.RankService;
 import lombok.RequiredArgsConstructor;
 
-
 @RestController
 @RequestMapping("/api/rank")
 @RequiredArgsConstructor
@@ -27,9 +26,8 @@ public class RankController {
      */
     @GetMapping("/baseball/{leagueId}")
     public List<BaseballRankDto> getBaseballRank(
-            @PathVariable Long leagueId,
-            @RequestParam String season
-    ) {
+            @PathVariable("leagueId") Long leagueId,
+            @RequestParam("season") String season) {
         return rankService.getBaseballRanks(leagueId, season);
     }
 
@@ -39,9 +37,8 @@ public class RankController {
      */
     @GetMapping("/soccer/{leagueId}")
     public List<SoccerRankDto> getSoccerRank(
-            @PathVariable Long leagueId,
-            @RequestParam String season
-    ) {
+            @PathVariable("leagueId") Long leagueId,
+            @RequestParam("season") String season) {
         return rankService.getSoccerRanks(leagueId, season);
     }
 }

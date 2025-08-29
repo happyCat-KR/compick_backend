@@ -1,6 +1,9 @@
 package kr.gg.compick.api;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +23,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import kr.gg.compick.security.jwt.JwtTokenProvider;
 import kr.gg.compick.user.service.UserService;
 import kr.gg.compick.util.ResponseData;
 import kr.gg.compick.verification.service.VerificationService;
@@ -37,6 +41,15 @@ public class VerificationController {
     private String redirectUri;
     @Value("${app.front-base-url}")
     private String frontBaseUrl;
+
+    private final JwtTokenProvider jwtTokenProvider;
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshDevOnly() {
+        System.out.println("호출됌");
+        String at = jwtTokenProvider.generateToken(9L); // 유저 9로 고정 발급
+        return ResponseEntity.ok(Map.of("accessToken", at));
+    }
 
     @PostMapping("/email/send")
     public ResponseEntity<ResponseData> sendEmailVerification(@RequestParam("email") String email) {
@@ -114,20 +127,21 @@ public class VerificationController {
         String providerUserId = me.id().toString();
         String email = me.kakao_account() != null ? me.kakao_account().email() : null;
 
-        ResponseData responseData = userService.kakaoSignup(email, providerUserId, "kakao");
-
-        String targetPath = (responseData.getCode() == 200) ? "/" : "/signup";
+        ResponseData<String> rd = userService.kakaoSignup(email, providerUserId, "kakao");
 
         UriComponentsBuilder b = UriComponentsBuilder
-                .fromUriString(frontBaseUrl + targetPath)
-                .queryParam("code", responseData.getCode());
+                .fromUriString(frontBaseUrl + "/kakao/result")
+                .queryParam("code", rd.getCode());
 
-        if (responseData.getCode() == 200 && responseData.getData() != null) {
-            String token = (String) responseData.getData();
-            b.fragment("token=" + java.net.URLEncoder.encode(token, java.nio.charset.StandardCharsets.UTF_8));
+        // 성공 + 토큰 존재 시에만 해시로 토큰 전달
+        if (rd.getCode() == 200 && rd.getData() != null && !rd.getData().isBlank()) {
+            b.fragment("token=" + URLEncoder.encode(rd.getData(), StandardCharsets.UTF_8));
+        } else {
+            // 실패 메시지는 쿼리로만 전달 (자동 인코딩)
+            b.queryParam("msg", rd.getMessage());
         }
-        String url = b.build(true).toUriString();
-        res.sendRedirect(url);
+
+        res.sendRedirect(b.build(true).toUriString());
 
     }
 
