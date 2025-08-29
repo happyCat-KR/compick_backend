@@ -11,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,8 +46,9 @@ public class VerificationController {
     private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshDevOnly() {
+    public ResponseEntity<?> refreshDevOnly(@CookieValue(value = "rt", required = false) String rt) {
         System.out.println("호출됌");
+        System.out.println("RT 쿠키: " + rt);
         String at = jwtTokenProvider.generateToken(9L); // 유저 9로 고정 발급
         return ResponseEntity.ok(Map.of("accessToken", at));
     }

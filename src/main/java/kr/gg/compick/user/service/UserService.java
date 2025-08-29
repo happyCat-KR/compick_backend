@@ -1,5 +1,6 @@
 package kr.gg.compick.user.service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -10,6 +11,7 @@ import jakarta.transaction.Transactional;
 import kr.gg.compick.domain.User;
 import kr.gg.compick.domain.UserOauth;
 import kr.gg.compick.domain.UserOauthId;
+import kr.gg.compick.refreshToken.service.RefreshTokenService;
 import kr.gg.compick.security.jwt.JwtTokenProvider;
 import kr.gg.compick.user.dao.UserRepository;
 import kr.gg.compick.user.dto.LoginDTO;
@@ -25,6 +27,13 @@ public class UserService {
     private final UserOauthRepository userOauthRepository;
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final RefreshTokenService refreshTokenService;
+
+    public record LoginTokens(
+        String accessToken,
+        String refreshToken,
+        LocalDateTime refreshExpiresAt
+    ) {}
 
     public String generateUnique(int maxTries) {
         for (int i = 0; i < maxTries; i++) {
@@ -97,15 +106,18 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseData loginNomal(LoginDTO loginDTO) {
+    public ResponseData loginNomal(LoginDTO loginDTO, String ip, String userAgent) {
         return userRepository.findByUserId(loginDTO.getUserId())
                 .map(user -> {
                     if (!loginDTO.getPassword().equals(user.getPassword())) {
                         return ResponseData.error(401, "비밀번호가 일치하지 않습니다.");
                     }
-
-                    String token = jwtTokenProvider.generateToken(user.getUserIdx());
-                    return ResponseData.success(token);
+                    // 1) AcessToken 발급
+                    String accessToken = jwtTokenProvider.generateToken(user.getUserIdx());
+                    // 2) RefreshToken 발급 & DB 저장
+                    var isuued = refreshTokenService.issue(user, userAgent, ip);
+                    var tokens = new LoginTokens(accessToken, isuued.getToken(), isuued.getExpiresAt());
+                    return ResponseData.success(tokens);
 
                 })
                 .orElse(ResponseData.error(404, "아이디가 존재하지 않습니다."));
