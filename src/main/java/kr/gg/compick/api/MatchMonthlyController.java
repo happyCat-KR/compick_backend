@@ -1,8 +1,5 @@
 package kr.gg.compick.api;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import kr.gg.compick.match.dto.MatchCardDto;
 import kr.gg.compick.match.service.MatchService;
 import lombok.RequiredArgsConstructor;
@@ -11,13 +8,12 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.*;
 
-
 @RestController
 @RequestMapping("/api/{sport}/{league}/match/monthly")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class MatchMonthlyController {
-    
+
     private final MatchService matchService;
 
     /**
@@ -26,11 +22,10 @@ public class MatchMonthlyController {
      */
     @GetMapping
     public List<MatchCardDto> monthly(
-            @PathVariable String sport,
-            @PathVariable String league,
-            @RequestParam int year,
-            @RequestParam int month
-    ) {
+            @PathVariable("sport") String sport,
+            @PathVariable("league") String league,
+            @RequestParam("year") int year,
+            @RequestParam("month") int month) {
         return matchService.getMonthlyGrid(sport, league, year, month);
     }
 }

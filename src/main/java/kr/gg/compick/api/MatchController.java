@@ -1,8 +1,5 @@
 package kr.gg.compick.api;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import kr.gg.compick.match.dto.MatchCardDto;
 import kr.gg.compick.match.dto.TeamInfoDto;
 import kr.gg.compick.match.service.MatchService;
@@ -17,24 +14,22 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
 @RestController
 @RequestMapping("/api/{sport}/{league}/matches")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class MatchController {
-    
+
     private final MatchService matchService;
     private final TeamInfoService teamInfoService;
 
     // 범위 조회 (FullCalendar 기본: start/end)
-    @GetMapping(params = {"start","end"})
+    @GetMapping(params = { "start", "end" })
     public List<MatchCardDto> range(
             @PathVariable String sport,
             @PathVariable String league,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end
-    ) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
         if (!end.isAfter(start)) {
             throw new IllegalArgumentException("end는 start보다 나중이어야 합니다.");
         }
@@ -42,24 +37,21 @@ public class MatchController {
     }
 
     // 월 그리드 조회 (옵션)
-    @GetMapping(params = {"year","month"})
+    @GetMapping(params = { "year", "month" })
     public List<MatchCardDto> monthlyGrid(
-            @PathVariable String sport,
-            @PathVariable String league,
-            @RequestParam int year,
-            @RequestParam int month
-    ) 
-    {
+            @PathVariable("sport") String sport,
+            @PathVariable("league") String league,
+            @RequestParam("year") int year,
+            @RequestParam("month") int month) {
         return matchService.getMonthlyGrid(sport, league, year, month);
     }
 
     // 상세 조회
     @GetMapping("/{matchId}")
     public MatchCardDto detail(
-            @PathVariable String sport,
-            @PathVariable String league,
-            @PathVariable Long matchId
-    ) {
+            @PathVariable("sport") String sport,
+            @PathVariable("league") String league,
+            @PathVariable("matchId") Long matchId) {
         return matchService.getDetail(sport, league, matchId);
     }
 
@@ -130,11 +122,11 @@ public class MatchController {
      */
     public static class TeamNameUpdateRequest {
         private String newTeamName;
-        
+
         public String getNewTeamName() {
             return newTeamName;
         }
-        
+
         public void setNewTeamName(String newTeamName) {
             this.newTeamName = newTeamName;
         }

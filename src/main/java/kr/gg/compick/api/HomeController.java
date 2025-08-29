@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping("/api/home")
 @RequiredArgsConstructor
 public class HomeController {
-    
+
     private final MatchService matchService;
 
     /**
@@ -34,28 +34,27 @@ public class HomeController {
             @RequestParam(required = false) String sport,
             @RequestParam(required = false) String league,
             @RequestParam(required = false) Integer year,
-            @RequestParam(required = false) Integer month
-    ) {
+            @RequestParam(required = false) Integer month) {
         // sport와 league가 모두 제공된 경우 조건부 조회
         if (sport != null && league != null) {
             // year와 month가 제공된 경우 월별 그리드 조회
             if (year != null && month != null) {
                 return matchService.getMonthlyGrid(sport, league, year, month);
             }
-            
+
             // start와 end가 제공된 경우 범위 조회
             if (start != null && end != null) {
                 return matchService.getInRange(sport, league, start, end);
             }
-            
+
             // 기본값 설정: 이번 주(월~일)
             LocalDateTime now = LocalDateTime.now();
             LocalDateTime defaultStart = now.with(java.time.DayOfWeek.MONDAY).withHour(0).withMinute(0).withSecond(0);
             LocalDateTime defaultEnd = defaultStart.plusWeeks(1);
-            
+
             return matchService.getInRange(sport, league, defaultStart, defaultEnd);
         }
-        
+
         // sport만 제공된 경우
         if (sport != null) {
             // sport가 "all"인 경우 모든 스포츠/리그 조회
@@ -64,44 +63,46 @@ public class HomeController {
                 if (year != null && month != null) {
                     return matchService.getAllMatchesMonthlyGrid(year, month);
                 }
-                
+
                 // start와 end가 제공된 경우 범위 조회
                 if (start != null && end != null) {
                     return matchService.getAllMatchesInRange(start, end);
                 }
-                
+
                 // 기본값 설정: 이번 주(월~일)
                 LocalDateTime now = LocalDateTime.now();
-                LocalDateTime defaultStart = now.with(java.time.DayOfWeek.MONDAY).withHour(0).withMinute(0).withSecond(0);
+                LocalDateTime defaultStart = now.with(java.time.DayOfWeek.MONDAY).withHour(0).withMinute(0)
+                        .withSecond(0);
                 LocalDateTime defaultEnd = defaultStart.plusWeeks(1);
-                
+
                 return matchService.getAllMatchesInRange(defaultStart, defaultEnd);
             }
-            
+
             // 특정 스포츠인 경우 해당 스포츠의 모든 리그 조회
             // year와 month가 제공된 경우 월별 그리드 조회
             if (year != null && month != null) {
                 return matchService.getMonthlyGrid(sport, "all", year, month);
             }
-            
+
             // start와 end가 제공된 경우 범위 조회
             if (start != null && end != null) {
                 return matchService.getInRange(sport, "all", start, end);
             }
-            
+
             // 기본값 설정: 이번 주(월~일)
             LocalDateTime now = LocalDateTime.now();
             LocalDateTime defaultStart = now.with(java.time.DayOfWeek.MONDAY).withHour(0).withMinute(0).withSecond(0);
             LocalDateTime defaultEnd = defaultStart.plusWeeks(1);
-            
+
             return matchService.getInRange(sport, "all", defaultStart, defaultEnd);
         }
-        
+
         // 모든 파라미터가 없는 경우 기존 로직 (모든 스포츠/리그)
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime defaultStart = start != null ? start : now.with(java.time.DayOfWeek.MONDAY).withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime defaultStart = start != null ? start
+                : now.with(java.time.DayOfWeek.MONDAY).withHour(0).withMinute(0).withSecond(0);
         LocalDateTime defaultEnd = end != null ? end : defaultStart.plusWeeks(1);
-        
+
         return matchService.getAllMatchesInRange(defaultStart, defaultEnd);
     }
 
@@ -112,27 +113,26 @@ public class HomeController {
     @GetMapping("/matches/today")
     public List<MatchCardDto> getTodayMatches(
             @RequestParam(required = false) String sport,
-            @RequestParam(required = false) String league
-    ) {
+            @RequestParam(required = false) String league) {
         LocalDateTime today = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
         LocalDateTime tomorrow = today.plusDays(1);
-        
+
         // sport와 league가 모두 제공된 경우
         if (sport != null && league != null) {
             return matchService.getInRange(sport, league, today, tomorrow);
         }
-        
+
         // sport만 제공된 경우
         if (sport != null) {
             // sport가 "all"인 경우 모든 스포츠/리그 조회
             if ("all".equalsIgnoreCase(sport)) {
                 return matchService.getAllMatchesInRange(today, tomorrow);
             }
-            
+
             // 특정 스포츠인 경우 해당 스포츠의 모든 리그 조회
             return matchService.getInRange(sport, "all", today, tomorrow);
         }
-        
+
         // 모든 파라미터가 없는 경우 기존 로직 (모든 스포츠/리그)
         return matchService.getAllMatchesInRange(today, tomorrow);
     }
@@ -144,28 +144,27 @@ public class HomeController {
     @GetMapping("/matches/thisweek")
     public List<MatchCardDto> getThisWeekMatches(
             @RequestParam(required = false) String sport,
-            @RequestParam(required = false) String league
-    ) {
+            @RequestParam(required = false) String league) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime weekStart = now.with(java.time.DayOfWeek.MONDAY).withHour(0).withMinute(0).withSecond(0);
         LocalDateTime weekEnd = weekStart.plusWeeks(1);
-        
+
         // sport와 league가 모두 제공된 경우
         if (sport != null && league != null) {
             return matchService.getInRange(sport, league, weekStart, weekEnd);
         }
-        
+
         // sport만 제공된 경우
         if (sport != null) {
             // sport가 "all"인 경우 모든 스포츠/리그 조회
             if ("all".equalsIgnoreCase(sport)) {
                 return matchService.getAllMatchesInRange(weekStart, weekEnd);
             }
-            
+
             // 특정 스포츠인 경우 해당 스포츠의 모든 리그 조회
             return matchService.getInRange(sport, "all", weekStart, weekEnd);
         }
-        
+
         // 모든 파라미터가 없는 경우 기존 로직 (모든 스포츠/리그)
         return matchService.getAllMatchesInRange(weekStart, weekEnd);
     }
@@ -178,27 +177,26 @@ public class HomeController {
      */
     @GetMapping("/matches/monthly")
     public List<MatchCardDto> getMonthlyMatches(
-            @RequestParam int year,
-            @RequestParam int month,
-            @RequestParam(required = false) String sport,
-            @RequestParam(required = false) String league
-    ) {
+            @RequestParam("year") int year,
+            @RequestParam("month") int month,
+            @RequestParam(value = "sport", required = false) String sport,
+            @RequestParam(value = "league", required = false) String league) {
         // sport와 league가 모두 제공된 경우
         if (sport != null && league != null) {
             return matchService.getMonthlyGrid(sport, league, year, month);
         }
-        
+
         // sport만 제공된 경우
         if (sport != null) {
             // sport가 "all"인 경우 모든 스포츠/리그 조회
             if ("all".equalsIgnoreCase(sport)) {
                 return matchService.getAllMatchesMonthlyGrid(year, month);
             }
-            
+
             // 특정 스포츠인 경우 해당 스포츠의 모든 리그 조회
             return matchService.getMonthlyGrid(sport, "all", year, month);
         }
-        
+
         // 모든 파라미터가 없는 경우 기존 로직 (모든 스포츠/리그)
         return matchService.getAllMatchesMonthlyGrid(year, month);
     }
@@ -209,11 +207,10 @@ public class HomeController {
      */
     @GetMapping("/matches/monthly/all")
     public List<MatchCardDto> getAllMatchesMonthly(
-            @RequestParam int year,
-            @RequestParam int month,
-            @RequestParam(required = false) String sport,
-            @RequestParam(required = false) String league
-    ) {
+            @RequestParam("year") int year,
+            @RequestParam("month") int month,
+            @RequestParam(value = "sport", required = false) String sport,
+            @RequestParam(value = "league", required = false) String league) {
         // 기존 getMonthlyMatches와 동일한 로직 사용
         return getMonthlyMatches(year, month, sport, league);
     }
@@ -226,27 +223,26 @@ public class HomeController {
     public List<MatchCardDto> getDateMatches(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) java.time.LocalDate date,
             @RequestParam(required = false) String sport,
-            @RequestParam(required = false) String league
-    ) {
+            @RequestParam(required = false) String league) {
         LocalDateTime dayStart = date.atStartOfDay();
         LocalDateTime dayEnd = dayStart.plusDays(1);
-        
+
         // sport와 league가 모두 제공된 경우
         if (sport != null && league != null) {
             return matchService.getInRange(sport, league, dayStart, dayEnd);
         }
-        
+
         // sport만 제공된 경우
         if (sport != null) {
             // sport가 "all"인 경우 모든 스포츠/리그 조회
             if ("all".equalsIgnoreCase(sport)) {
                 return matchService.getAllMatchesInRange(dayStart, dayEnd);
             }
-            
+
             // 특정 스포츠인 경우 해당 스포츠의 모든 리그 조회
             return matchService.getInRange(sport, "all", dayStart, dayEnd);
         }
-        
+
         // 모든 파라미터가 없는 경우 기존 로직 (모든 스포츠/리그)
         return matchService.getAllMatchesInRange(dayStart, dayEnd);
     }
@@ -257,35 +253,33 @@ public class HomeController {
      */
     @GetMapping("/matches/date/{year}/{month}/{day}")
     public List<MatchCardDto> getDateMatchesByPath(
-            @PathVariable int year,
-            @PathVariable int month,
-            @PathVariable int day,
-            @RequestParam(required = false) String sport,
-            @RequestParam(required = false) String league
-    ) {
+            @PathVariable("year") int year,
+            @PathVariable("month") int month,
+            @PathVariable("day") int day,
+            @RequestParam(value = "sport", required = false) String sport,
+            @RequestParam(value = "league", required = false) String league) {
         java.time.LocalDate date = java.time.LocalDate.of(year, month, day);
         LocalDateTime dayStart = date.atStartOfDay();
         LocalDateTime dayEnd = dayStart.plusDays(1);
-        
+
         // sport와 league가 모두 제공된 경우
         if (sport != null && league != null) {
             return matchService.getInRange(sport, league, dayStart, dayEnd);
         }
-        
+
         // sport만 제공된 경우
         if (sport != null) {
             // sport가 "all"인 경우 모든 스포츠/리그 조회
             if ("all".equalsIgnoreCase(sport)) {
                 return matchService.getAllMatchesInRange(dayStart, dayEnd);
             }
-            
+
             // 특정 스포츠인 경우 해당 스포츠의 모든 리그 조회
             return matchService.getInRange(sport, "all", dayStart, dayEnd);
         }
-        
+
         // 모든 파라미터가 없는 경우 기존 로직 (모든 스포츠/리그)
         return matchService.getAllMatchesInRange(dayStart, dayEnd);
     }
-
 
 }

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping("/api/all")
 @RequiredArgsConstructor
 public class AllMatchesController {
-    
+
     private final MatchService matchService;
 
     /**
@@ -29,13 +29,13 @@ public class AllMatchesController {
     @GetMapping("/matches")
     public List<MatchCardDto> getAllSportsMatches(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end
-    ) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
         // 기본값 설정: 이번 주(월~일)
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime defaultStart = start != null ? start : now.with(java.time.DayOfWeek.MONDAY).withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime defaultStart = start != null ? start
+                : now.with(java.time.DayOfWeek.MONDAY).withHour(0).withMinute(0).withSecond(0);
         LocalDateTime defaultEnd = end != null ? end : defaultStart.plusWeeks(1);
-        
+
         return matchService.getAllMatchesInRange(defaultStart, defaultEnd);
     }
 
@@ -46,7 +46,7 @@ public class AllMatchesController {
     public List<MatchCardDto> getAllSportsTodayMatches() {
         LocalDateTime today = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
         LocalDateTime tomorrow = today.plusDays(1);
-        
+
         return matchService.getAllMatchesInRange(today, tomorrow);
     }
 
@@ -58,7 +58,7 @@ public class AllMatchesController {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime weekStart = now.with(java.time.DayOfWeek.MONDAY).withHour(0).withMinute(0).withSecond(0);
         LocalDateTime weekEnd = weekStart.plusWeeks(1);
-        
+
         return matchService.getAllMatchesInRange(weekStart, weekEnd);
     }
 
@@ -69,12 +69,12 @@ public class AllMatchesController {
     public List<MatchCardDto> getSportAllLeaguesMatches(
             @PathVariable String sport,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end
-    ) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
         // 기본값 설정: 오늘부터 7일간
-        LocalDateTime defaultStart = start != null ? start : LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime defaultStart = start != null ? start
+                : LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
         LocalDateTime defaultEnd = end != null ? end : defaultStart.plusDays(7);
-        
+
         return matchService.getInRange(sport, "all", defaultStart, defaultEnd);
     }
 
@@ -85,7 +85,7 @@ public class AllMatchesController {
     public List<MatchCardDto> getSportAllLeaguesTodayMatches(@PathVariable String sport) {
         LocalDateTime today = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
         LocalDateTime tomorrow = today.plusDays(1);
-        
+
         return matchService.getInRange(sport, "all", today, tomorrow);
     }
 
@@ -97,7 +97,7 @@ public class AllMatchesController {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime weekStart = now.with(java.time.DayOfWeek.MONDAY).withHour(0).withMinute(0).withSecond(0);
         LocalDateTime weekEnd = weekStart.plusWeeks(1);
-        
+
         return matchService.getInRange(sport, "all", weekStart, weekEnd);
     }
 
@@ -106,9 +106,8 @@ public class AllMatchesController {
      */
     @GetMapping("/matches/monthly")
     public List<MatchCardDto> getAllSportsMonthlyMatches(
-            @RequestParam int year,
-            @RequestParam int month
-    ) {
+            @RequestParam("year") int year,
+            @RequestParam("month") int month) {
         return matchService.getAllMatchesMonthlyGrid(year, month);
     }
 
@@ -117,11 +116,10 @@ public class AllMatchesController {
      */
     @GetMapping("/matches/date")
     public List<MatchCardDto> getAllSportsDateMatches(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) java.time.LocalDate date
-    ) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) java.time.LocalDate date) {
         LocalDateTime dayStart = date.atStartOfDay();
         LocalDateTime dayEnd = dayStart.plusDays(1);
-        
+
         return matchService.getAllMatchesInRange(dayStart, dayEnd);
     }
 
@@ -130,14 +128,13 @@ public class AllMatchesController {
      */
     @GetMapping("/matches/date/{year}/{month}/{day}")
     public List<MatchCardDto> getAllSportsDateMatchesByPath(
-            @PathVariable int year,
-            @PathVariable int month,
-            @PathVariable int day
-    ) {
+            @PathVariable("year") int year,
+            @PathVariable("month") int month,
+            @PathVariable("day") int day) {
         java.time.LocalDate date = java.time.LocalDate.of(year, month, day);
         LocalDateTime dayStart = date.atStartOfDay();
         LocalDateTime dayEnd = dayStart.plusDays(1);
-        
+
         return matchService.getAllMatchesInRange(dayStart, dayEnd);
     }
 
@@ -146,10 +143,9 @@ public class AllMatchesController {
      */
     @GetMapping("/{sport}/matches/monthly")
     public List<MatchCardDto> getSportAllLeaguesMonthlyMatches(
-            @PathVariable String sport,
-            @RequestParam int year,
-            @RequestParam int month
-    ) {
+            @PathVariable("sport") String sport,
+            @RequestParam("year") int year,
+            @RequestParam("month") int month) {
         return matchService.getMonthlyGrid(sport, "all", year, month);
     }
 
@@ -159,11 +155,10 @@ public class AllMatchesController {
     @GetMapping("/{sport}/matches/date")
     public List<MatchCardDto> getSportAllLeaguesDateMatches(
             @PathVariable String sport,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) java.time.LocalDate date
-    ) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) java.time.LocalDate date) {
         LocalDateTime dayStart = date.atStartOfDay();
         LocalDateTime dayEnd = dayStart.plusDays(1);
-        
+
         return matchService.getInRange(sport, "all", dayStart, dayEnd);
     }
 }
