@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import kr.gg.compick.domain.User;
 import kr.gg.compick.domain.UserOauth;
 import kr.gg.compick.domain.UserOauthId;
+import kr.gg.compick.refreshToken.dto.IssuedRefresh;
 import kr.gg.compick.refreshToken.service.RefreshTokenService;
 import kr.gg.compick.security.jwt.JwtTokenProvider;
 import kr.gg.compick.user.dao.UserRepository;
@@ -29,10 +30,9 @@ public class UserService {
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenService refreshTokenService;
 
-    public record LoginTokens(
+    public record AuthTokens(
         String accessToken,
-        String refreshToken,
-        LocalDateTime refreshExpiresAt
+        IssuedRefresh refresh
     ) {}
 
     public String generateUnique(int maxTries) {
@@ -72,14 +72,16 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseData kakaoSignup(String email, String providerUserId, String provider) {
+    public ResponseData kakaoSignup(String email, String providerUserId, String provider,
+                                    String userAgent, String ip) {
         UserOauthId id = new UserOauthId(provider, providerUserId);
-
         Optional<UserOauth> link = userOauthRepository.findById(id);
+
         if (link.isPresent()) {
             User user = link.get().getUser();
-            String token = jwtTokenProvider.generateToken(user.getUserIdx());
-            return ResponseData.success(token);
+            String at = jwtTokenProvider.generateToken(user.getUserIdx());
+            var rt = refreshTokenService.issue(user, userAgent, ip);
+            return ResponseData.success(new AuthTokens(at, rt));
         }
         if (userRepository.existsByEmail(email)) {
             return ResponseData.error(500, "이미 존재하는 이메일 입니다.");
@@ -97,8 +99,9 @@ public class UserService {
                     .user(user)
                     .build());
 
-            String token = jwtTokenProvider.generateToken(user.getUserIdx());
-            return ResponseData.success(token);
+            String at = jwtTokenProvider.generateToken(user.getUserIdx());
+            var rt = refreshTokenService.issue(user, userAgent, ip);
+            return ResponseData.success(new AuthTokens(at, rt));
         } catch (DataIntegrityViolationException e) {
             return ResponseData.error(409, "연동 충돌이 발생했습니다.");
 
@@ -113,11 +116,10 @@ public class UserService {
                         return ResponseData.error(401, "비밀번호가 일치하지 않습니다.");
                     }
                     // 1) AcessToken 발급
-                    String accessToken = jwtTokenProvider.generateToken(user.getUserIdx());
+                    String at = jwtTokenProvider.generateToken(user.getUserIdx());
                     // 2) RefreshToken 발급 & DB 저장
-                    var isuued = refreshTokenService.issue(user, userAgent, ip);
-                    var tokens = new LoginTokens(accessToken, isuued.getToken(), isuued.getExpiresAt());
-                    return ResponseData.success(tokens);
+                    var rt = refreshTokenService.issue(user, userAgent, ip);
+                    return ResponseData.success(new AuthTokens(at, rt));
 
                 })
                 .orElse(ResponseData.error(404, "아이디가 존재하지 않습니다."));
