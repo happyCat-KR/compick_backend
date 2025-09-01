@@ -25,4 +25,15 @@ public class CookieUtil {
         }
         return sb.toString();
     }
+
+    public static String deleteHttpOnlyCookie(String name, String path, boolean secure) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(name).append("=; Path=").append(path)
+                .append("; Max-Age=0; HttpOnly");
+        if (secure)
+            sb.append("; SameSite=None; Secure");
+        else
+            sb.append("; SameSite=Lax");
+        return sb.toString();
+    }
 }

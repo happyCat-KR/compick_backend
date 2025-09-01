@@ -3,6 +3,8 @@ package kr.gg.compick.api;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
 
@@ -22,10 +24,16 @@ import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import kr.gg.compick.refreshToken.exception.RefreshException;
+import kr.gg.compick.refreshToken.service.RefreshTokenService;
 import kr.gg.compick.security.jwt.JwtTokenProvider;
 import kr.gg.compick.user.service.UserService;
+import kr.gg.compick.user.service.UserService.AuthTokens;
+import kr.gg.compick.util.CookieUtil;
+import kr.gg.compick.util.IPUtil;
 import kr.gg.compick.util.ResponseData;
 import kr.gg.compick.verification.service.VerificationService;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +44,8 @@ import lombok.RequiredArgsConstructor;
 public class VerificationController {
     private final UserService userService;
     private final VerificationService verificationService;
+    private final RefreshTokenService refreshTokenService;
+
     @Value("${kakao.client-id}")
     private String clientId;
     @Value("${kakao.redirect-uri}")
@@ -46,11 +56,41 @@ public class VerificationController {
     private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshDevOnly(@CookieValue(value = "rt", required = false) String rt) {
-        System.out.println("호출됌");
-        System.out.println("RT 쿠키: " + rt);
-        String at = jwtTokenProvider.generateToken(9L); // 유저 9로 고정 발급
-        return ResponseEntity.ok(Map.of("accessToken", at));
+    public ResponseEntity<?> refresh(
+            @CookieValue(value = "rt", required = false) String rtCookie,
+            HttpServletRequest request,
+            HttpServletResponse response) {
+
+        if (rtCookie == null || rtCookie.isBlank()) {
+            return ResponseEntity
+                    .status(401)
+                    .body(ResponseData.error(401, "NO_REFRESH_COOKIE"));
+        }
+
+        String ip = IPUtil.getClientIp(request);
+        String ua = request.getHeader("User-Agent");
+
+        try {
+            var rotated = refreshTokenService.verifyAndRotate(rtCookie, ua, ip);
+
+            var maxAge = Duration.between(LocalDateTime.now(), rotated.getRefresh().getExpiresAt());
+            boolean isHttps = request.isSecure();
+
+            response.addHeader("Set-Cookie", CookieUtil.deleteHttpOnlyCookie("rt", "/", isHttps));
+            response.addHeader("Set-Cookie", CookieUtil.deleteHttpOnlyCookie("rt", "/api/auth", isHttps));
+            response.addHeader("Set-Cookie", CookieUtil.buildHttpOnlyCookie(
+                    "rt", rotated.getRefresh().getToken(), maxAge, "/api/auth", isHttps));
+            
+            return ResponseEntity.ok(
+                    ResponseData.success(
+                            Map.of("accessToken", rotated.getAccessToken())));
+
+        } catch (RefreshException e) {
+            return ResponseEntity
+                    .status(401)
+                    .body(ResponseData.error(401, e.getMessage()));
+
+        }
     }
 
     @PostMapping("/email/send")
@@ -92,6 +132,7 @@ public class VerificationController {
     public void KakaoCallback(
             @RequestParam("code") String code,
             @RequestParam("state") String state,
+            HttpServletRequest req,
             HttpServletResponse res,
             HttpSession session) throws IOException {
 
@@ -129,15 +170,27 @@ public class VerificationController {
         String providerUserId = me.id().toString();
         String email = me.kakao_account() != null ? me.kakao_account().email() : null;
 
-        ResponseData<String> rd = userService.kakaoSignup(email, providerUserId, "kakao");
+        ResponseData<AuthTokens> rd = userService.kakaoSignup(
+                email, providerUserId, "kakao",
+                req.getHeader("User-Agent"),
+                IPUtil.getClientIp(req));
 
         UriComponentsBuilder b = UriComponentsBuilder
                 .fromUriString(frontBaseUrl + "/kakao/result")
                 .queryParam("code", rd.getCode());
 
         // 성공 + 토큰 존재 시에만 해시로 토큰 전달
-        if (rd.getCode() == 200 && rd.getData() != null && !rd.getData().isBlank()) {
-            b.fragment("token=" + URLEncoder.encode(rd.getData(), StandardCharsets.UTF_8));
+        if (rd.getCode() == 200 && rd.getData() != null) {
+            var tokens = rd.getData();
+
+            var maxAge = Duration.between(LocalDateTime.now(), tokens.refresh().getExpiresAt());
+            boolean isHttps = req.isSecure();
+            res.addHeader("Set-Cookie", CookieUtil.deleteHttpOnlyCookie("rt", "/", isHttps));
+            res.addHeader("Set-Cookie", CookieUtil.deleteHttpOnlyCookie("rt", "/api/auth", isHttps));
+            res.addHeader("Set-Cookie", CookieUtil.buildHttpOnlyCookie(
+                    "rt", tokens.refresh().getToken(), maxAge, "/api/auth", isHttps));
+
+            b.fragment("token=" + URLEncoder.encode(tokens.accessToken(), StandardCharsets.UTF_8));
         } else {
             // 실패 메시지는 쿼리로만 전달 (자동 인코딩)
             b.queryParam("msg", rd.getMessage());

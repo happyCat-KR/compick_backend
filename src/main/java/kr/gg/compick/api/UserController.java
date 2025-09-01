@@ -21,7 +21,7 @@ import kr.gg.compick.security.UserDetailsImpl;
 import kr.gg.compick.user.dto.LoginDTO;
 import kr.gg.compick.user.dto.UserRegistDTO;
 import kr.gg.compick.user.service.UserService;
-import kr.gg.compick.user.service.UserService.LoginTokens;
+import kr.gg.compick.user.service.UserService.AuthTokens;
 import kr.gg.compick.util.CookieUtil;
 import kr.gg.compick.util.IPUtil;
 import kr.gg.compick.util.ResponseData;
@@ -49,22 +49,23 @@ public class UserController {
 
         String ip = IPUtil.getClientIp(request);
         String userAgent = request.getHeader("User-Agent");
-        ResponseData res = userService.loginNomal(loginDTO, ip, userAgent);
+        ResponseData<AuthTokens> res = userService.loginNomal(loginDTO, ip, userAgent);
 
-        if (res.getCode() == 200) {
-            LoginTokens tokens = (LoginTokens) res.getData();
-
-            Duration maxAge = Duration.between(LocalDateTime.now(), tokens.refreshExpiresAt());
-            boolean isHttps = request.isSecure(); // 또는 profile로 분기
-            String cookie = CookieUtil.buildHttpOnlyCookie("rt", tokens.refreshToken(), maxAge, "/api/auth", isHttps);
-
-            response.addHeader("Set-Cookie", cookie);
-            return ResponseEntity.ok(ResponseData.success(
-                    Map.of("accessToken", tokens.accessToken())));
+        if (res.getCode() != 200 || res.getData() == null) {
+            return ResponseEntity.status(res.getCode()).body(res);
         }
 
-        return ResponseEntity.ok(res);
+        var tokens = res.getData();
+        var maxAge = Duration.between(LocalDateTime.now(), tokens.refresh().getExpiresAt());
+        boolean isHttps = request.isSecure(); // 또는 profile로 분기
 
+        response.addHeader("Set-Cookie", CookieUtil.deleteHttpOnlyCookie("rt", "/", isHttps));
+        response.addHeader("Set-Cookie", CookieUtil.deleteHttpOnlyCookie("rt", "/api/auth", isHttps));
+        response.addHeader("Set-Cookie", CookieUtil.buildHttpOnlyCookie(
+                "rt", tokens.refresh().getToken(), maxAge, "/api/auth", isHttps));
+
+        return ResponseEntity.ok(ResponseData.success(
+                Map.of("accessToken", tokens.accessToken())));
     }
 
     @GetMapping("/check/userid")
