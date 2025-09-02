@@ -8,9 +8,9 @@ import kr.gg.compick.domain.RankBaseball;
 
 public interface BaseballRankRepository extends JpaRepository<RankBaseball, Long> {
 
-    // 특정 리그 + 시즌 기준 순위 조회
-    List<RankBaseball> findByLeague_LeagueIdAndSeasonOrderByRankAsc(Long leagueId, String season);
+    // 특정 리그 + 시즌 순위 조회
+    List<RankBaseball> findByLeague_LeagueIdAndSeasonOrderByRankNoAsc(Long leagueId, String season);
 
     // 시즌 전체 순위 조회
-    List<RankBaseball> findBySeasonOrderByRankAsc(String season);
+    List<RankBaseball> findBySeasonOrderByRankNoAsc(String season);
 }

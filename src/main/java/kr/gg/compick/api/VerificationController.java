@@ -170,6 +170,9 @@ public class VerificationController {
         String providerUserId = me.id().toString();
         String email = me.kakao_account() != null ? me.kakao_account().email() : null;
 
+        System.out.println("providerUserId"+providerUserId);
+        System.out.println("email"+email);
+
         ResponseData<AuthTokens> rd = userService.kakaoSignup(
                 email, providerUserId, "kakao",
                 req.getHeader("User-Agent"),

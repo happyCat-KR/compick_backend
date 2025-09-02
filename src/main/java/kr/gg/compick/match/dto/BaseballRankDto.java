@@ -35,7 +35,7 @@ public class BaseballRankDto {
     private LocalDateTime updatedAt;
 
     public static BaseballRankDto fromEntity(RankBaseball e) {
-        TeamInfo team = e.getTeamInfo();
+        TeamInfo team = e.getTeam();
         League league = e.getLeague();
 
         return BaseballRankDto.builder()
@@ -46,14 +46,14 @@ public class BaseballRankDto {
                 .teamId(team.getTeamId())
                 .teamName(TeamNameMapper.getKoreanName(team.getTeamName()))
                 .teamLogo(team.getImageUrl())
-                .games(e.getGames())
+                .gamesBehind(e.getGamesBehind())
                 .wins(e.getWins())
                 .losses(e.getLosses())
                 .ties(e.getTies())
                 .winPct(e.getWinPct())
                 .gamesBehind(e.getGamesBehind())
                 .points(e.getPoints())
-                .rank(e.getRank())
+                .rank(e.getRankNo())
                 .updatedAt(e.getUpdatedAt())
                 .build();
     }
