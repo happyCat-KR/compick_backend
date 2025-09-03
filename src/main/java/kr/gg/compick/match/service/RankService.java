@@ -20,7 +20,7 @@ public class RankService {
     private final SoccerRankRepository soccerRankRepository;
 
     public List<BaseballRankDto> getBaseballRanks(Long leagueId, String season) {
-        return baseballRankRepository.findByLeague_LeagueIdAndSeasonOrderByRankAsc(leagueId, season)
+        return baseballRankRepository.findByLeague_LeagueIdAndSeasonOrderByRankNoAsc(leagueId, season)
                 .stream()
                 .map(BaseballRankDto::fromEntity)
                 .toList();
