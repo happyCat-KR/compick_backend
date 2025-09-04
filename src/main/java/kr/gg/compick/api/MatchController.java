@@ -13,8 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
-
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +24,6 @@ import jakarta.annotation.PostConstruct;
 @RestController
 @RequestMapping("/api/match/{sport}/{league}")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class MatchController {
 
     private final MatchService matchService;
@@ -60,14 +57,21 @@ public class MatchController {
      * GET /api/match/{sport}/{league}/monthly?year=2025&month=9
      */
     @GetMapping("/monthly")
-    public List<MatchCardDto> monthly(
+    public ResponseEntity<List<MatchCardDto>> monthly(
             @PathVariable String sport,
             @PathVariable String league,
             @RequestParam int year,
             @RequestParam int month
     ) {
         log.info("[MONTHLY] sport={}, league={}, year={}, month={}", sport, league, year, month);
-        return matchService.getMonthlyGrid(sport, league, year, month);
+        List<MatchCardDto> result = matchService.getMonthlyGrid(sport, league, year, month);
+       
+
+    return ResponseEntity.ok()
+            .header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+            .header("Pragma", "no-cache")
+            .header("Expires", "0")
+            .body(result);
     }
 
     /**
