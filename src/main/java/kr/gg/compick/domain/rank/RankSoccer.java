@@ -1,4 +1,4 @@
-package kr.gg.compick.domain;
+package kr.gg.compick.domain.rank;
 
 import java.time.LocalDateTime;
 
@@ -11,6 +11,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import kr.gg.compick.domain.League;
+import kr.gg.compick.domain.TeamInfo;
 import lombok.Getter;
 import lombok.Setter;
 

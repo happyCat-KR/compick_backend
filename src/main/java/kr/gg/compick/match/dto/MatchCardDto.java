@@ -1,21 +1,30 @@
 package kr.gg.compick.match.dto;
 import java.time.LocalDateTime;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MatchCardDto {
-    public final Long matchId;
-    public final String sport;        
-    public final String leagueNickname;   
-    public final String leagueName;   
-    public final String leagueLogo;   // 리그 이미지 URL 추가
-    public final String homeTeamName;
-    public final String homeTeamLogo;
-    public final int    homeScore;
-    public final String awayTeamName;
-    public final String awayTeamLogo;
-    public final int    awayScore;
-    public final LocalDateTime startTime;
-    public final String matchStatus;
+    private Long matchId;
+    private String sport;        
+    private String leagueNickname;   
+    private String leagueName;   
+    private String leagueLogo;   // 리그 이미지 URL 추가
+    private Long homeTeamId;  
+    private String homeTeamName;
+    private String homeTeamLogo;
+    private int    homeScore;
+    private Long awayTeamId;  
+    private String awayTeamName;
+    private String awayTeamLogo;
+    private int    awayScore;
+    private LocalDateTime startTime;
+    private String matchStatus;
+    
 }

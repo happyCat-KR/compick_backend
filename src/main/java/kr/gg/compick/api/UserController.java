@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kr.gg.compick.domain.User;
-import kr.gg.compick.refreshToken.service.RefreshTokenService;
 import kr.gg.compick.security.UserDetailsImpl;
 import kr.gg.compick.user.dto.LoginDTO;
 import kr.gg.compick.user.dto.UserRegistDTO;

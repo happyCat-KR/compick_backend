@@ -1,6 +1,7 @@
-package kr.gg.compick.domain;
+package kr.gg.compick.domain.match;
 
 import jakarta.persistence.*;
+import kr.gg.compick.domain.match.MatchScoreId;
 import lombok.*;
 
 @Entity

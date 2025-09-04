@@ -1,4 +1,4 @@
-package kr.gg.compick.domain;
+package kr.gg.compick.domain.match;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -8,6 +8,8 @@ public interface MatchCardProjection {
     String getSport();
     String getLeagueName();
     String getLeagueLogo();  // 리그 이미지 URL 추가
+    Number getHomeTeamId();
+    Number getAwayTeamId();
     String getHomeTeamName();
     String getHomeTeamLogo();
     String getAwayTeamName();

@@ -21,9 +21,6 @@ import java.util.stream.Collectors;
 public class TeamInfoService {
     
     private final TeamInfoRepository teamInfoRepository;
-    
-
-    
     /**
      * 모든 팀 정보 조회 (팀명 순으로 정렬)
      */
@@ -133,5 +130,12 @@ public class TeamInfoService {
             log.error("팀 정보 생성 중 오류 발생", e);
             return ResponseData.error(500, "팀 정보 생성 실패: " + e.getMessage());
         }
+    }
+    
+    /**
+     * 팀명으로 팀 정보 조회 (RankService에서 사용)
+     */
+    public Optional<TeamInfo> findTeamByName(String teamName) {
+        return teamInfoRepository.findByTeamName(teamName);
     }
 }

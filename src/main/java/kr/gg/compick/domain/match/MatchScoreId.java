@@ -1,4 +1,4 @@
-package kr.gg.compick.domain;
+package kr.gg.compick.domain.match;
 
 import java.io.Serializable;
 import lombok.AllArgsConstructor;
