@@ -1,6 +1,8 @@
-package kr.gg.compick.domain;
+package kr.gg.compick.domain.match;
 
 import jakarta.persistence.*;
+import kr.gg.compick.domain.League;
+import kr.gg.compick.domain.TeamInfo;
 import lombok.*;
 import java.time.LocalDateTime;
 

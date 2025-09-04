@@ -11,6 +11,7 @@ public class TeamNameMapper {
     private static final Map<String, String> TEAM_NAME_MAP = new HashMap<>();
     
     static {
+    
         // 영국 프리미어 리그 (EPL) 팀명 매핑
         TEAM_NAME_MAP.put("Manchester United", "맨유");
         TEAM_NAME_MAP.put("Manchester City", "맨시티");

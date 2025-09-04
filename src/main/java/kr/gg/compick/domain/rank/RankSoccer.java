@@ -1,4 +1,4 @@
-package kr.gg.compick.domain;
+package kr.gg.compick.domain.rank;
 
 import java.time.LocalDateTime;
 
@@ -11,14 +11,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import kr.gg.compick.domain.League;
+import kr.gg.compick.domain.TeamInfo;
 import lombok.Getter;
 import lombok.Setter;
 
-
 @Entity
-@Table(name = "rank_baseball")
+@Table(name = "rank_soccer")
 @Getter @Setter
-public class RankBaseball {
+public class RankSoccer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,16 +37,21 @@ public class RankBaseball {
     @JoinColumn(name = "team_id", nullable = false)
     private TeamInfo teamInfo;
 
-    private int games;
+    @Column(name = "play_count")
+    private int playCount;
+
     private int wins;
+    private int draws;
     private int losses;
-    private int ties;
 
-    @Column(name = "win_pct")
-    private double winPct; // 승률
+    @Column(name = "get_goal")
+    private int getGoal;   // 득점
 
-    @Column(name = "games_behind")
-    private Double gamesBehind; // 게임차
+    @Column(name = "losd_goal")
+    private int losdGoal;  // 실점
+
+    @Column(name = "goal_count")
+    private int goalCount; // 득실차
 
     private int points;
 
