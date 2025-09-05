@@ -52,6 +52,7 @@ public class MatchService {
 
         .startTime(p.getStartTime())
         .matchStatus(p.getMatchStatus())
+        .leagueCode(LeagueNameMapper.toCode(p.getLeagueNickname()))
         .build();
 }
 
@@ -130,17 +131,6 @@ public class MatchService {
             .map(this::toDto)
             .toList();
     }
-
-    /* 홈 최근대결 */
-    // public List<MatchCardDto> getRecentHomeMatches(Long leagueId, Long teamId) {
-    //     return matchRepository.findHomeMatch(leagueId, teamId)
-    //             .stream().map(this::toDto).toList();
-    // }
-
-    // public List<MatchCardDto> getRecentAwayMatches(Long leagueId, Long teamId) {
-    //     return matchRepository.findAwayMatch(leagueId, teamId)
-    //             .stream().map(this::toDto).toList();
-    // }
 
      /** 둘 다 한 번에 가져오는 편의 메서드 */
      

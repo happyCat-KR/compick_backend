@@ -26,5 +26,6 @@ public class MatchCardDto {
     private int    awayScore;
     private LocalDateTime startTime;
     private String matchStatus;
+    private String leagueCode;
     
 }
