@@ -200,78 +200,75 @@ public interface MatchCalenderRepository extends JpaRepository<Matches, Long> {
     """, nativeQuery = true)
     List<MatchCardProjection> findHeadToHeadCards(@Param("home") Long home,
                                               @Param("away") Long away);
-    
     /* 홈 최근경기 */
-    @Query(value = """
-    SELECT
-          ms.match_id            AS matchId,
-          sp.sport_name          AS sport,
-          l.league_nickname      AS leagueNickname,
-          l.league_name          AS leagueName,
-          l.image_url            AS leagueLogo,
-          th.team_id             AS homeTeamId,
-          th.team_name           AS homeTeamName,
-          th.image_url           AS homeTeamLogo,
-          ta.team_id             AS awayTeamId,
-          ta.team_name           AS awayTeamName,
-          ta.image_url           AS awayTeamLogo,
-          COALESCE(sh.score, 0)  AS homeTeamScore,
-          COALESCE(sa.score, 0)  AS awayTeamScore,
-          ms.start_time          AS startTime,
-          mc.description         AS matchStatus
-        FROM matches ms
-        JOIN team_info th        ON ms.home_team_id = th.team_id
-        JOIN team_info ta        ON ms.away_team_id = ta.team_id
-        JOIN league l            ON ms.league_id    = l.league_id
-        JOIN match_status mc     ON ms.status_code  = mc.code
-        JOIN sport sp            ON l.sport_id      = sp.sport_id
-        LEFT JOIN match_score sh ON sh.match_id = ms.match_id AND sh.team_id = ms.home_team_id
-        LEFT JOIN match_score sa ON sa.match_id = ms.match_id AND sa.team_id = ms.away_team_id
-        WHERE l.league_id = :leagueId
-          AND ms.home_team_id = :teamId
-          and mc.description = "Ended"
-        ORDER BY ms.start_time DESC
-        LIMIT 5;
-    """, nativeQuery = true)
-    List<MatchCardProjection> findHomeMatch( 
-      @Param("leagueId") Long leagueId,
-      @Param("teamId")   Long teamId
-    );
-     /* 어웨이 최근경기 */
-    @Query(value = """
-    SELECT
-          ms.match_id            AS matchId,
-          sp.sport_name          AS sport,
-          l.league_nickname      AS leagueNickname,
-          l.league_name          AS leagueName,
-          l.image_url            AS leagueLogo,
-          th.team_id             AS homeTeamId,
-          th.team_name           AS homeTeamName,
-          th.image_url           AS homeTeamLogo,
-          ta.team_id             AS awayTeamId,
-          ta.team_name           AS awayTeamName,
-          ta.image_url           AS awayTeamLogo,
-          COALESCE(sh.score, 0)  AS homeScore,
-          COALESCE(sa.score, 0)  AS awayScore,
-          ms.start_time          AS startTime,
-          mc.description         AS matchStatus
-        FROM matches ms
-        JOIN team_info th        ON ms.home_team_id = th.team_id
-        JOIN team_info ta        ON ms.away_team_id = ta.team_id
-        JOIN league l            ON ms.league_id    = l.league_id
-        JOIN match_status mc     ON ms.status_code  = mc.code
-        JOIN sport sp            ON l.sport_id      = sp.sport_id
-        LEFT JOIN match_score sh ON sh.match_id = ms.match_id AND sh.team_id = ms.home_team_id
-        LEFT JOIN match_score sa ON sa.match_id = ms.match_id AND sa.team_id = ms.away_team_id
-        WHERE l.league_id = :league
-          AND ms.away_team_id = :teamId
-          and mc.description = "Ended"
-        ORDER BY ms.start_time DESC
-        LIMIT 5;
-    """, nativeQuery = true)
-    List<MatchCardProjection> findAwayMatch( 
-      @Param("league") Long leagueId,
-      @Param("teamId") Long teamId);
+@Query(value = """
+SELECT
+      ms.match_id            AS matchId,
+      sp.sport_name          AS sport,
+      l.league_nickname      AS leagueNickname,
+      l.league_name          AS leagueName,
+      l.image_url            AS leagueLogo,
+      th.team_id             AS homeTeamId,
+      th.team_name           AS homeTeamName,
+      th.image_url           AS homeTeamLogo,
+      ta.team_id             AS awayTeamId,
+      ta.team_name           AS awayTeamName,
+      ta.image_url           AS awayTeamLogo,
+      COALESCE(sh.score, 0)  AS homeScore,
+      COALESCE(sa.score, 0)  AS awayScore,
+      ms.start_time          AS startTime,
+      mc.description         AS matchStatus
+      FROM matches ms
+      JOIN team_info th        ON ms.home_team_id = th.team_id
+      JOIN team_info ta        ON ms.away_team_id = ta.team_id
+      JOIN league l            ON ms.league_id    = l.league_id
+      JOIN match_status mc     ON ms.status_code  = mc.code
+      JOIN sport sp            ON l.sport_id      = sp.sport_id
+      LEFT JOIN match_score sh ON sh.match_id = ms.match_id AND sh.team_id = ms.home_team_id
+      LEFT JOIN match_score sa ON sa.match_id = ms.match_id AND sa.team_id = ms.away_team_id
+      WHERE l.league_id = :leagueId
+        AND (ms.home_team_id = :teamId OR ms.away_team_id = :teamId)
+        AND mc.description = 'Ended'
+      ORDER BY ms.start_time DESC
+      LIMIT 5;
+""", nativeQuery = true)
+List<MatchCardProjection> findHomeMatch(@Param("leagueId") Long leagueId,
+                                        @Param("teamId")   Long teamId);
 
+
+/* 어웨이 최근경기 */
+@Query(value = """
+SELECT
+      ms.match_id            AS matchId,
+      sp.sport_name          AS sport,
+      l.league_nickname      AS leagueNickname,
+      l.league_name          AS leagueName,
+      l.image_url            AS leagueLogo,
+      th.team_id             AS homeTeamId,
+      th.team_name           AS homeTeamName,
+      th.image_url           AS homeTeamLogo,
+      ta.team_id             AS awayTeamId,
+      ta.team_name           AS awayTeamName,
+      ta.image_url           AS awayTeamLogo,
+      COALESCE(sh.score, 0)  AS homeScore,
+      COALESCE(sa.score, 0)  AS awayScore,
+      ms.start_time          AS startTime,
+      mc.description         AS matchStatus
+      FROM matches ms
+      JOIN team_info th        ON ms.home_team_id = th.team_id
+      JOIN team_info ta        ON ms.away_team_id = ta.team_id
+      JOIN league l            ON ms.league_id    = l.league_id
+      JOIN match_status mc     ON ms.status_code  = mc.code
+      JOIN sport sp            ON l.sport_id      = sp.sport_id
+      LEFT JOIN match_score sh ON sh.match_id = ms.match_id AND sh.team_id = ms.home_team_id
+      LEFT JOIN match_score sa ON sa.match_id = ms.match_id AND sa.team_id = ms.away_team_id
+      WHERE l.league_id = :leagueId
+        AND (ms.away_team_id = :teamId OR ms.home_team_id = :teamId)
+        AND mc.description = 'Ended'
+      ORDER BY ms.start_time DESC
+      LIMIT 5;
+""", nativeQuery = true)
+List<MatchCardProjection> findAwayMatch(@Param("leagueId") Long leagueId,
+                                        @Param("teamId")   Long teamId);
 
     }
