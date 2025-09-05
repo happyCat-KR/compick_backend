@@ -36,10 +36,7 @@ out/
 ### VS Code ###
 .vscode/
 
-### Environment files ###
-application.yaml
-application.properties
-.env
+
 
 
 
