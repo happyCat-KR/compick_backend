@@ -6,10 +6,23 @@ pipeline {
     DEPLOY_DIR = '/home/ec2-user/app/compick'
   }
   triggers { githubPush() }
+
   stages {
-    stage('Checkout'){ steps { checkout scm } }
-    stage('Build'){ steps { sh './gradlew clean bootJar -x test' } }
-    stage('Deploy'){
+    stage('Checkout') {
+      steps { checkout scm }
+    }
+
+    stage('Build') {
+      steps {
+        sh '''
+          chmod +x gradlew || true
+          sed -i 's/\\r$//' gradlew || true
+          ./gradlew clean bootJar -x test --no-daemon
+        '''
+      }
+    }
+
+    stage('Deploy') {
       steps {
         withCredentials([string(credentialsId: 'backends-hosts', variable: 'BACKENDS')]) {
           sshagent(credentials: [env.SSH_CRED]) {
@@ -24,5 +37,9 @@ pipeline {
         }
       }
     }
+  }
+
+  post {
+    failure { echo 'Build 실패: gradlew 권한/라인엔딩 확인 요망' }
   }
 }
