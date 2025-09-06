@@ -98,4 +98,5 @@
 - 인증: `/api/verification`
 
 ### Jenkinsfile-test
-- 1
+- test1
+- test2
