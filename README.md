@@ -100,3 +100,4 @@
 ### Jenkinsfile-test
 - test1
 - test2
+- test3: ssh agent 설치
