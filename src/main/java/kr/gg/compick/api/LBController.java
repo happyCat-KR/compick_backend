@@ -15,6 +15,6 @@ public class LBController {
 
     @GetMapping("/api/lb/who")
     public Map<String, String> whoAmI() {
-        return Map.of("instance", instanceName);
+        return Map.of("instance", instanceName+"test");
     }
 }
