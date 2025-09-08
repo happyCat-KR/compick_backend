@@ -1,9 +1,3 @@
-// 컴파일러에 -parameters 플래그 추가
-tasks.withType(JavaCompile).configureEach {
-    options.compilerArgs += ['-parameters']
-}
-
-
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.4'
