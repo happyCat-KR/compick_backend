@@ -23,14 +23,15 @@ public class SecurityConfig {
         private final JwtTokenProvider jwtTokenProvider;
         private final JwtAuthEntryPoint jwtAuthEntryPoint;
 
-        private static final List<String> PERMIT_URLS = List.of(
-        "/", "/index.html", "/error", "/favicon.ico",
-        "/api/user/regist",
-        "/api/user/login/normal",
-        "/api/user/check/**",
-        "/api/auth/**",     // 카카오 콜백 포함
-        "/api/test/**",
-        "/api/match/**"     // 공개로 두려면 유지, 아니면 제거
+    private static final List<String> PERMIT_URLS = List.of(
+
+            "/api/user/regist",
+            "/api/user/login/normal",
+            "/api/user/check/**",
+            "/api/auth/**",
+            "/api/test/**",
+            "/api/match/**",
+            "/lb/who"
     );
 
     SecurityConfig(JwtTokenProvider jwtTokenProvider,

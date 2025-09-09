@@ -36,10 +36,9 @@ out/
 ### VS Code ###
 .vscode/
 
-### Environment files ###
-application.yaml
-application.properties
-.env
+# Ignore application.yml
+src/main/resources/application.yml
+src/main/resources/application.yaml
 
 
 

@@ -96,3 +96,8 @@
 - 순위 조회: `/api/{sport}/{league}/rank`
 - 사용자 관리: `/api/users`
 - 인증: `/api/verification`
+
+### Jenkinsfile-test
+- test1
+- test2
+- test3: ssh agent 설치
