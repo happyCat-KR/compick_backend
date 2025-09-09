@@ -54,10 +54,6 @@ public class Board {
     private LocalDateTime deletedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")   
-    private Board parentBoard;
-
-     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "match_id")       // ✅ match_id 추가
     private Matches match;
 

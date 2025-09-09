@@ -40,16 +40,10 @@ public class BoardService {
         User user = userRepository.findById(boardRegistDTO.getUserIdx())
                 .orElseThrow(() -> new IllegalArgumentException("유저가 없습니다."));
 
-        Board parentBoard = null;
-        if (boardRegistDTO.getParentIdx() != null) {
-            parentBoard = boardRepository.findById(boardRegistDTO.getParentIdx())
-                    .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다."));
-        }
 
         Board board = Board.builder()
                 .user(user)
                 .content(boardRegistDTO.getContent())
-                .parentBoard(parentBoard)
                 .build();
 
         return board;

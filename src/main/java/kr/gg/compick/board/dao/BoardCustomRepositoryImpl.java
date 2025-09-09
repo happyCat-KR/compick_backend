@@ -24,8 +24,7 @@ public class BoardCustomRepositoryImpl implements BoardCustomRepository {
                         u.user_id AS userId,
                         t.content AS content,
                         GROUP_CONCAT(DISTINCT m.file_url) AS fileUrls,
-                        COUNT(DISTINCT tl.user_idx) AS likeCount,
-                        (SELECT COUNT(*) FROM board c WHERE c.parent_idx = t.board_idx) AS commentCount
+                        COUNT(DISTINCT tl.user_idx) AS likeCount
                     FROM USER u
                     LEFT JOIN board t ON u.user_idx = t.user_idx
                     LEFT JOIN media m ON t.board_idx = m.board_idx
@@ -37,7 +36,6 @@ public class BoardCustomRepositoryImpl implements BoardCustomRepository {
                             SELECT matchtag_idx FROM matchtag WHERE matchtag_name = :matchtagName
                         )
                     )
-                    AND t.parent_idx IS NULL AND t.del_check = 0
                     GROUP BY t.board_idx, u.profile_image, u.user_id, t.content
                     ORDER BY likeCount DESC
                 """;
@@ -58,8 +56,7 @@ public class BoardCustomRepositoryImpl implements BoardCustomRepository {
                         u.user_id AS userId,
                         t.content AS content,
                         GROUP_CONCAT(DISTINCT m.file_url) AS fileUrls,
-                        COUNT(DISTINCT tl.user_idx) AS likeCount,
-                        (SELECT COUNT(*) FROM board c WHERE c.parent_idx = t.board_idx) AS commentCount
+                        COUNT(DISTINCT tl.user_idx) AS likeCount
                     FROM USER u
                     LEFT JOIN board t ON u.user_idx = t.user_idx
                     LEFT JOIN media m ON t.board_idx = m.board_idx
@@ -69,7 +66,6 @@ public class BoardCustomRepositoryImpl implements BoardCustomRepository {
                     WHERE t.board_idx IN (
                         SELECT board_idx FROM board WHERE content LIKE CONCAT('%', :keyword, '%')
                     )
-                    AND t.parent_idx IS NULL AND t.del_check = 0
                     GROUP BY t.board_idx, u.profile_image, u.user_id, t.content
                     ORDER BY likeCount DESC
                 """;
@@ -91,8 +87,7 @@ public class BoardCustomRepositoryImpl implements BoardCustomRepository {
                         u.user_id AS userId,
                         t.content AS content,
                         GROUP_CONCAT(DISTINCT m.file_url) AS fileUrls,
-                        COUNT(DISTINCT tl.user_idx) AS likeCount,
-                        (SELECT COUNT(*) FROM board c WHERE c.parent_idx = t.board_idx) AS commentCount
+                        COUNT(DISTINCT tl.user_idx) AS likeCount
                     FROM USER u
                     LEFT JOIN board t ON u.user_idx = t.user_idx
                     LEFT JOIN media m ON t.board_idx = m.board_idx
@@ -115,7 +110,7 @@ public class BoardCustomRepositoryImpl implements BoardCustomRepository {
                             ) AS limited_matchtags
                         )
                         GROUP BY th.board_idx
-                    ) AND t.parent_idx IS NULL AND t.del_check = 0
+                    )
                     GROUP BY t.board_idx, u.profile_image, u.user_id, t.content
                     ORDER BY likeCount DESC
                 """, "BoardViewMapping")
@@ -134,8 +129,7 @@ public class BoardCustomRepositoryImpl implements BoardCustomRepository {
                         u.user_id AS userId,
                         t.content AS content,
                         GROUP_CONCAT(DISTINCT m.file_url) AS fileUrls,
-                        COUNT(DISTINCT tl.user_idx) AS likeCount,
-                        (SELECT COUNT(*) FROM board c WHERE c.parent_idx = t.board_idx) AS commentCount
+                        COUNT(DISTINCT tl.user_idx) AS likeCount
                     FROM USER u
                     LEFT JOIN board t ON u.user_idx = t.user_idx
                     LEFT JOIN media m ON t.board_idx = m.board_idx
@@ -150,7 +144,7 @@ public class BoardCustomRepositoryImpl implements BoardCustomRepository {
                             FROM follow
                             WHERE follower_id = :userIdx AND del_check = 0
                         )
-                    ) AND t.parent_idx IS NULL AND t.del_check = 0
+                    ) 
                     GROUP BY t.board_idx, u.profile_image, u.user_id, t.content
                     ORDER BY likeCount DESC
                 """, "BoardViewMapping")
@@ -163,13 +157,11 @@ public class BoardCustomRepositoryImpl implements BoardCustomRepository {
     public BoardViewDTO findDetailBoard(Long boardIdx) {
         String sql = """
         WITH RECURSIVE reply_tree AS (
-            SELECT board_idx, parent_idx
+            SELECT board_idx,
             FROM board
-            WHERE parent_idx = :boardIdx
             UNION ALL
-            SELECT t.board_idx, t.parent_idx
+            SELECT t.board_idx
             FROM board t
-            JOIN reply_tree rt ON t.parent_idx = rt.board_idx
         )
         SELECT 
             t.board_idx AS boardIdx,
@@ -197,35 +189,35 @@ public class BoardCustomRepositoryImpl implements BoardCustomRepository {
     }
 
 
-     @Override
-    public List<BoardViewDTO> findRepliesOfBoard(Long parentIdx) {
-        String sql = """
-        SELECT 
-            t.board_idx AS boardIdx,
-            u.profile_image AS profileImage,
-            GROUP_CONCAT(DISTINCT h.matchtag_name) AS matchtagName,
-            u.user_idx AS userIdx,
-            u.user_id AS userId,
-            t.content AS content,
-            GROUP_CONCAT(DISTINCT m.file_url) AS fileUrls,
-            COUNT(DISTINCT tl.user_idx) AS likeCount,
-            (SELECT COUNT(*) FROM board c WHERE c.parent_idx = t.board_idx) AS commentCount
-        FROM USER u
-        LEFT JOIN board t ON u.user_idx = t.user_idx
-        LEFT JOIN media m ON t.board_idx = m.board_idx
-        LEFT JOIN board_like tl ON t.board_idx = tl.board_idx AND tl.del_check = 0
-        LEFT JOIN board_matchtag th ON t.board_idx = th.board_idx
-        LEFT JOIN matchtag h ON th.matchtag_idx = h.matchtag_idx
-        WHERE t.board_idx IN (
-            SELECT board_idx FROM board WHERE parent_idx = :parentIdx
-        ) AND t.del_check = 0
-        GROUP BY t.board_idx, u.profile_image, u.user_id, t.content
-        ORDER BY likeCount DESC
-    """;
-        return em.createNativeQuery(sql, "BoardViewMapping")
-                .setParameter("parentIdx", parentIdx)
-                .getResultList();
-    }
+    //  @Override
+    // public List<BoardViewDTO> findRepliesOfBoard(Long parentIdx) {
+    //     String sql = """
+    //     SELECT 
+    //         t.board_idx AS boardIdx,
+    //         u.profile_image AS profileImage,
+    //         GROUP_CONCAT(DISTINCT h.matchtag_name) AS matchtagName,
+    //         u.user_idx AS userIdx,
+    //         u.user_id AS userId,
+    //         t.content AS content,
+    //         GROUP_CONCAT(DISTINCT m.file_url) AS fileUrls,
+    //         COUNT(DISTINCT tl.user_idx) AS likeCount,
+    //         (SELECT COUNT(*) FROM board c WHERE c.parent_idx = t.board_idx) AS commentCount
+    //     FROM USER u
+    //     LEFT JOIN board t ON u.user_idx = t.user_idx
+    //     LEFT JOIN media m ON t.board_idx = m.board_idx
+    //     LEFT JOIN board_like tl ON t.board_idx = tl.board_idx AND tl.del_check = 0
+    //     LEFT JOIN board_matchtag th ON t.board_idx = th.board_idx
+    //     LEFT JOIN matchtag h ON th.matchtag_idx = h.matchtag_idx
+    //     WHERE t.board_idx IN (
+    //         SELECT board_idx FROM board WHERE parent_idx = :parentIdx
+    //     ) AND t.del_check = 0
+    //     GROUP BY t.board_idx, u.profile_image, u.user_id, t.content
+    //     ORDER BY likeCount DESC
+    // """;
+    //     return em.createNativeQuery(sql, "BoardViewMapping")
+    //             .setParameter("parentIdx", parentIdx)
+    //             .getResultList();
+    // }
 
 
 }

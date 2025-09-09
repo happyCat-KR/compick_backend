@@ -1,18 +1,21 @@
 package kr.gg.compick.api;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import kr.gg.compick.board.dto.BoardRegistDTO;
 import kr.gg.compick.board.service.BoardService;
+import kr.gg.compick.domain.User;
+import kr.gg.compick.security.UserDetailsImpl;
 import kr.gg.compick.util.ResponseData;
 import lombok.RequiredArgsConstructor;
 
@@ -24,26 +27,27 @@ public class BoardController {
     private final BoardService boardService;
 
      // 게시글 작성
-    @PostMapping(value = "/regist")
-    public ResponseEntity<ResponseData<?>> boardRegist(MultipartHttpServletRequest request) throws IOException {
-        Long userIdx = Long.parseLong(request.getParameter("userIdx"));
+    @PostMapping(
+    value = "/regist",
+    consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<ResponseData<?>> boardRegist(
+            @AuthenticationPrincipal UserDetailsImpl principal,
+            @RequestParam(value = "content", defaultValue = "") String content,
+            @RequestParam(value = "matchtagName", required = false) List<String> matchtagList,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images
+    ) throws IOException {
 
-        String parentIdxStr = request.getParameter("parentIdx");
-        Long parentIdx = (parentIdxStr != null && !parentIdxStr.isBlank()) ? Long.parseLong(parentIdxStr) : null;
+        User user = principal.getUser();
+        long userIdx = user.getUserIdx();
+        List<String> safeTags = (matchtagList != null) ? matchtagList : List.of();
+        List<MultipartFile> safeImages = (images != null) ? images : List.of();
 
-        String content = request.getParameter("content");
-        if (content == null)
-            content = "";
-
-        String[] matchtagName = request.getParameterValues("matchtagName");
-        List<String> matchtagList = (matchtagName != null) ? Arrays.asList(matchtagName) : List.of();
-
-        List<MultipartFile> boardImages = request.getFiles("images");
-
-        BoardRegistDTO boardRegistDTO = new BoardRegistDTO(userIdx, parentIdx, content, matchtagList, boardImages);
+        BoardRegistDTO boardRegistDTO =
+                new BoardRegistDTO(userIdx, content, safeTags, safeImages);
 
         ResponseData<?> responseData = boardService.boardRegist(boardRegistDTO);
-
         return ResponseEntity.ok(responseData);
     }
+
 }
