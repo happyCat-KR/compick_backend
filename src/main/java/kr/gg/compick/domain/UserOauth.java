@@ -2,9 +2,6 @@ package kr.gg.compick.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "user_oauth", indexes = @Index(name = "idx_user", columnList = "user_id"),

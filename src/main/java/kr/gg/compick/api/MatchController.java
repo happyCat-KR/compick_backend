@@ -1,6 +1,5 @@
 package kr.gg.compick.api;
 
-import kr.gg.compick.domain.TeamInfo;
 import kr.gg.compick.match.dao.LeagueRepository;
 import kr.gg.compick.match.dto.MatchCardDto;
 import kr.gg.compick.match.dto.TeamInfoDto;
