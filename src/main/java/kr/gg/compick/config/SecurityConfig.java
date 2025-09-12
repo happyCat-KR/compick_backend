@@ -32,7 +32,13 @@ public class SecurityConfig {
             "/api/test/**",
             "/api/match/**",
             "/lb/who",
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
             "/api/board/**",
+=======
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
             "/internal/**"
     );
 
