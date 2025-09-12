@@ -32,7 +32,8 @@ public class SecurityConfig {
             "/api/test/**",
             "/api/match/**",
             "/lb/who",
-            "/api/board/**"
+            "/api/board/**",
+            "/internal/**"
     );
 
     SecurityConfig(JwtTokenProvider jwtTokenProvider,
