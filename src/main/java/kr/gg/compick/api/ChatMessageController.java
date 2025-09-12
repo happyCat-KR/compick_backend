@@ -45,6 +45,7 @@ public class ChatMessageController {
         @RequestParam("matchId") Long matchId,
         @RequestParam("content") String content 
     ) {
+        System.out.println("regist hi");
         User user = principal.getUser();
         ResponseData res = chatMessageService.chatRegist(matchId, user, content);
         return ResponseEntity.ok(res);
