@@ -13,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,8 +27,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import kr.gg.compick.domain.User;
 import kr.gg.compick.refreshToken.exception.RefreshException;
 import kr.gg.compick.refreshToken.service.RefreshTokenService;
+import kr.gg.compick.security.UserDetailsImpl;
 import kr.gg.compick.security.jwt.JwtTokenProvider;
 import kr.gg.compick.user.service.UserService;
 import kr.gg.compick.user.service.UserService.AuthTokens;
@@ -53,6 +56,11 @@ public class VerificationController {
     private String frontBaseUrl;
 
     private final JwtTokenProvider jwtTokenProvider;
+
+    @GetMapping("/check")
+    public ResponseEntity<ResponseData> check() {
+        return ResponseEntity.ok(ResponseData.success("OK"));
+    }
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(

@@ -26,11 +26,11 @@ public class ChatMessage {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "match_id", nullable = false, foreignKey = @ForeignKey(name = "fk_chat_match"))
-    private Matches matchId;           // FK(matches.match_id)
+    private Matches matches;           // FK(matches.match_id)
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_idx", nullable = false, foreignKey = @ForeignKey(name = "fk_chat_user"))
-    private User userIdx;           // FK(USER.user_idx)
+    private User user;           // FK(USER.user_idx)
 
     @Column(name = "content", nullable = false, length = 2000)
     private String content;
