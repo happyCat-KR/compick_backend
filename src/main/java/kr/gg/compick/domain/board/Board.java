@@ -56,6 +56,10 @@ public class Board {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "match_id")       // ✅ match_id 추가
     private Matches match;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_idx")
+    private Category category;
 
     private String alert1;
     private String alert2;

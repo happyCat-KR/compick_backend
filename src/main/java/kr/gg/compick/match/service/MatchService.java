@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,8 +16,10 @@ import kr.gg.compick.match.dao.MatchCalenderRepository;
 import kr.gg.compick.match.util.LeagueNameMapper;
 import kr.gg.compick.match.util.TeamNameMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class MatchService {
@@ -52,7 +55,7 @@ public class MatchService {
 
         .startTime(p.getStartTime())
         .matchStatus(p.getMatchStatus())
-        .leagueCode(LeagueNameMapper.toCode(p.getLeagueNickname()))
+        .leagueId(LeagueNameMapper.toCode(p.getLeagueNickname()))
         .build();
 }
 
@@ -145,6 +148,22 @@ public class MatchService {
             .stream()
             .map(this::toDto)
             .toList();      
+    }
+    
+
+    public List<MatchCardProjection > searchMatches(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return List.of();
+        }
+
+        // 👉 한글 입력이면 영어로 변환
+        String converted = TeamNameMapper.getEnglishName(keyword);
+        log.info("🔎 [SEARCH] raw keyword={}, converted={}", keyword, converted);
+        System.out.println("keyword: "+ keyword+" / converted: "+converted);
+
+        
+        // 👉 부분 검색을 위해 % 추가
+        return matchRepository.searchMatchesByKeyword(converted);
     }
 
 

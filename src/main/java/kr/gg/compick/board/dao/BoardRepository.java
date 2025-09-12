@@ -1,20 +1,55 @@
 package kr.gg.compick.board.dao;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
+import kr.gg.compick.board.dto.BoardResponseDTO;
 import kr.gg.compick.domain.board.Board;
 
-@Repository
+
 public interface BoardRepository extends JpaRepository<Board, Long> {
-    List<Board> findAllByUserUserIdx(Long userIdx);
 
-    @Query("SELECT t FROM Board t WHERE t.delCheck = true AND t.deletedAt <= :threshold")
-    List<Board> findAllForCleanup(@Param("threshold") LocalDateTime threshold);
+  // ✅ 전체 조회
+ @Query("""
+    SELECT new kr.gg.compick.board.dto.BoardResponseDTO(
+        c,                       
+        bo.boardId,              
+        u.userNickname,          
+        u.profileImage,          
+        bo.content,              
+        me.fileUrl,              
+        bo.createdAt             
+    )
+    FROM Board bo
+    JOIN Media me ON me.board = bo
+    JOIN User u ON u.userIdx = bo.user.userIdx
+    JOIN bo.category c
+    WHERE (:sport IS NULL OR LOWER(c.sport.sportName) = LOWER(:sport))
+      AND (:league IS NULL OR LOWER(c.league.leagueNickname) = LOWER(:league))
+""")
+List<BoardResponseDTO> findBoardsDynamic(@Param("sport") String sport,
+                                         @Param("league") String league);
 
+    @Query("""
+        SELECT new kr.gg.compick.board.dto.BoardResponseDTO(
+            c,
+            bo.boardId,
+            u.userNickname,
+            u.profileImage,
+            bo.content,
+            me.fileUrl,
+            bo.createdAt
+        )
+        FROM Board bo
+        JOIN Media me ON me.board = bo
+        JOIN User u ON u.userIdx = bo.user.userIdx
+        JOIN bo.category c
+    """)
+    List<BoardResponseDTO> findBoardsWithCategory();
+    
+
+    
 }

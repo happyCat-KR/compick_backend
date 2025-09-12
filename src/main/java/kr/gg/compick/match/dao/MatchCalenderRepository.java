@@ -3,12 +3,14 @@ package kr.gg.compick.match.dao;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.antlr.v4.runtime.atn.SemanticContext.OR;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import kr.gg.compick.domain.match.Matches;
+import kr.gg.compick.match.dto.MatchCardDto;
 
 @Repository
 public interface MatchCalenderRepository extends JpaRepository<Matches, Long> {
@@ -270,5 +272,40 @@ SELECT
 """, nativeQuery = true)
 List<MatchCardProjection> findAwayMatch(@Param("leagueId") Long leagueId,
                                         @Param("teamId")   Long teamId);
+
+
+
+    @Query(value = """
+        SELECT 
+            ms.match_id        AS matchId,
+            sp.sport_name      AS sport,
+            l.league_nickname  AS leagueNickname,
+            l.league_name      AS leagueName,
+            l.image_url        AS leagueLogo,
+            th.team_id         AS homeTeamId,
+            th.team_name       AS homeTeamName,
+            th.image_url       AS homeTeamLogo,
+            ta.team_id         AS awayTeamId,
+            ta.team_name       AS awayTeamName,
+            ta.image_url       AS awayTeamLogo,
+            COALESCE(sh.score, 0) AS homeScore,
+            COALESCE(sa.score, 0) AS awayScore,
+            ms.start_time      AS startTime,
+            mc.description     AS matchStatus,
+            l.league_name        AS leagueName
+        FROM matches ms
+        JOIN team_info th        ON ms.home_team_id = th.team_id
+        JOIN team_info ta        ON ms.away_team_id = ta.team_id
+        JOIN league l            ON ms.league_id    = l.league_id
+        JOIN sport sp            ON l.sport_id      = sp.sport_id
+        JOIN match_status mc     ON ms.status_code  = mc.code
+        LEFT JOIN match_score sh ON sh.match_id = ms.match_id AND sh.team_id = th.team_id
+        LEFT JOIN match_score sa ON sa.match_id = ms.match_id AND sa.team_id = ta.team_id
+        WHERE (LOWER(th.team_name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(ta.team_name) LIKE LOWER(CONCAT('%', :keyword, '%')))
+        ORDER BY ms.start_time ASC
+        """, nativeQuery = true)
+    List<MatchCardProjection > searchMatchesByKeyword(@Param("keyword") String keyword);
+
 
     }

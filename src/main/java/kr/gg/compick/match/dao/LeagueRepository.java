@@ -3,7 +3,6 @@ package kr.gg.compick.match.dao;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import kr.gg.compick.domain.League;
 
@@ -32,6 +31,25 @@ public interface LeagueRepository extends JpaRepository<League, Long> {
 Optional<Long> findIdSmartIgnoringSpaces(@Param("sport") String sport,
                                          @Param("league") String league,
                                          @Param("mappedNickname") String mappedNickname);
+
+
+  @Query("""
+  SELECT l.leagueId
+  FROM League l
+  JOIN l.sport s
+  WHERE
+    function('REPLACE', LOWER(TRIM(s.sportCode)), ' ', '') =
+    function('REPLACE', LOWER(TRIM(:sport)),      ' ', '')
+    AND (
+      function('REPLACE', LOWER(TRIM(l.leagueNickname)), ' ', '') =
+      function('REPLACE', LOWER(TRIM(:mappedNickname)),  ' ', '')
+      OR
+      function('REPLACE', LOWER(TRIM(l.leagueName)),     ' ', '') =
+      function('REPLACE', LOWER(TRIM(:mappedNickname)),  ' ', '')
+    )
+""")
+Optional<Long> findbyLeagueId(@Param("sport") String sport,                                       
+                              @Param("mappedNickname") String mappedNickname);
 
   
     @Query(value = """

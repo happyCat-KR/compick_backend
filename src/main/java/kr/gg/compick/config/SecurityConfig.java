@@ -32,8 +32,10 @@ public class SecurityConfig {
             "/api/auth/**",
             "/api/test/**",
             "/api/match/**",
-            "/lb/who"
-    );
+            "/lb/who",
+            "/api/board/list/**",
+            "/api/board/list"
+        );
 
     SecurityConfig(JwtTokenProvider jwtTokenProvider,
                 MyUserDetailsService myUserDetailsService,

@@ -1,21 +1,23 @@
 package kr.gg.compick.board.service;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import kr.gg.compick.board.dao.BoardRepository;
 import kr.gg.compick.board.dto.BoardRegistDTO;
+import kr.gg.compick.board.dto.BoardResponseDTO;
 import kr.gg.compick.boardmatch.dao.BoardMatchtagRepository;
+import kr.gg.compick.category.dao.CategoryRepository;
+import kr.gg.compick.category.service.CategoryService;
 import kr.gg.compick.domain.Media;
 import kr.gg.compick.domain.User;
 import kr.gg.compick.domain.board.Board;
 import kr.gg.compick.domain.board.BoardMatchtag;
 import kr.gg.compick.domain.board.BoardMatchtagId;
+import kr.gg.compick.domain.board.Category;
 import kr.gg.compick.domain.user.Matchtag;
 import kr.gg.compick.matchtag.dao.MatchtagRepository;
 import kr.gg.compick.media.dao.MediaRepository;
@@ -33,47 +35,40 @@ public class BoardService {
     private final MediaRepository mediaRepository;
     private final BoardMatchtagRepository boardmatchtagRepository;
     private final BoardRepository boardRepository;
-
+    private final CategoryService categoryService;
     
     @Transactional
     private Board boardInsert(BoardRegistDTO boardRegistDTO) {
         User user = userRepository.findById(boardRegistDTO.getUserIdx())
-                .orElseThrow(() -> new IllegalArgumentException("유저가 없습니다."));
+            .orElseThrow(() -> new IllegalArgumentException("유저가 없습니다."));
 
+    // ✅ CategoryService에서 Category 엔티티 가져오기 (있으면 재사용, 없으면 생성)
+        Category category = categoryService.getOrCreateCategory(
+            boardRegistDTO.getSport(),
+            boardRegistDTO.getLeague()
+        );     
 
-        Board board = Board.builder()
-                .user(user)
-                .content(boardRegistDTO.getContent())
-                .build();
-
-        return board;
-    }
-    @Transactional
-    private Media mediaInsert(Board savedBoard, String url) {
-        String extension = url.substring(url.lastIndexOf(".") + 1);
-        
-        Media media = Media.builder()
-            .board(savedBoard)   // ✅ 필드명이 board라서 정상
-            .fileUrl(url)
-            .fileType(extension)
+    return Board.builder()
+            .user(user)
+            .content(boardRegistDTO.getContent())
+            .category(category)   // ✅ Category 엔티티로 조인
             .build();
-        return media;
-    }
-     @Transactional
-    private BoardMatchtag boardMatchtagInsert(Board savedBoard, String matchtagName) {
+            
+    }    
 
+    @Transactional
+    private BoardMatchtag boardMatchtagInsert(Board savedBoard, String matchtagName) {
+        
         Matchtag matchtag = matchtagRepository.findByMatchtagName(matchtagName)
                 .orElseThrow(() -> new IllegalArgumentException("해쉬태그가 없습니다."));
 
         BoardMatchtagId boardMatchtagId = new BoardMatchtagId(
                 savedBoard.getBoardId(), matchtag.getMatchtagIdx());
-
-        BoardMatchtag boardMatchtag = BoardMatchtag.builder()
+                BoardMatchtag boardMatchtag = BoardMatchtag.builder()
                 .id(boardMatchtagId)
                 .board(savedBoard)
                 .matchtag(matchtag)
                 .build();
-
         return boardMatchtag;
     }
 
@@ -81,29 +76,44 @@ public class BoardService {
      * 게시글 작성
      */
     @Transactional
-    public ResponseData<?> boardRegist(BoardRegistDTO boardRegistDTO) throws IOException {
+    public ResponseData<?> boardRegist(BoardRegistDTO boardRegistDTO) throws IOException {  
+    // 1. Board 저장
+    Board savedBoard = boardRepository.save(boardInsert(boardRegistDTO));
 
-        
-        // 1. board 테이블 객체 생성 및 반환.
-        Board savedBoard = boardRepository.save(boardInsert(boardRegistDTO));
-
-        List<String> savedImageUrls = FileUploadUtil.saveImages(boardRegistDTO.getPostImages(),
-                boardRegistDTO.getUserIdx());
-
-        for (String url : savedImageUrls) {
-            // 2. media 테이블 객체 생성 및 반환
-            mediaRepository.save(mediaInsert(savedBoard, url));
-        }
-
-        for (String matchtagName : boardRegistDTO.getMatchtagName()) {
-            // 3. thread_hastag 테이블 객체 생성 및 반환
-            boardmatchtagRepository.save(boardMatchtagInsert(savedBoard, matchtagName));
-
-        }
-
-        return ResponseData.success();
-
+    // 2. 이미지 URL 검증
+    String savedImageUrl = FileUploadUtil.saveImageUrl(boardRegistDTO.getImage());
+    if (savedImageUrl != null) {
+        // ✅ Media 엔티티 바로 생성
+        String extension = "";
+        int dotIndex = savedImageUrl.lastIndexOf(".");
+        if (dotIndex > 0 && dotIndex < savedImageUrl.length() - 1) {
+            extension = savedImageUrl.substring(dotIndex + 1);
+}
+        Media media = Media.builder()
+                .board(savedBoard)
+                .fileUrl(savedImageUrl)   // 바로 저장
+                .fileType(extension)
+                .build();
+        mediaRepository.save(media);
     }
+
+    List<String> safeTags = boardRegistDTO.getMatchtagName() != null 
+        ? boardRegistDTO.getMatchtagName() 
+        : List.of();
+
+    for (String matchtagName : safeTags) {
+        boardmatchtagRepository.save(boardMatchtagInsert(savedBoard, matchtagName));
+    }
+
+    return ResponseData.success();
+}
+
+    
+    /* 게시글 조회 */
+    public List<BoardResponseDTO> getBoardsList(String sport, String league) {
+        return boardRepository.findBoardsDynamic(sport, league);
+    }
+}
 
     // @Transactional
     // public ResponseData PostWriteUserProfile(Long userIdx) {
@@ -237,4 +247,3 @@ public class BoardService {
 
    
 
-}

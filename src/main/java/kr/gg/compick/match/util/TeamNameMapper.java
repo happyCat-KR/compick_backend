@@ -271,7 +271,7 @@ public class TeamNameMapper {
         TEAM_NAME_MAP.put("Kairat Almaty", "카라이트 알마티");
         TEAM_NAME_MAP.put("Rubin Kazan", "루빈 카잔");
         TEAM_NAME_MAP.put("Ufa", "우파");
-        TEAM_NAME_MAP.put("Arsenal Tula", "아스날 툴라");
+        TEAM_NAME_MAP.put("Arsenal", "아스날");
         TEAM_NAME_MAP.put("Akhmat Grozny", "아흐마트 그로즈니");
         TEAM_NAME_MAP.put("Ural Yekaterinburg", "우랄 예카테린부르크");
         TEAM_NAME_MAP.put("Sochi", "소치");
@@ -455,7 +455,6 @@ public class TeamNameMapper {
         TEAM_NAME_MAP.put("FC Rostov", "로스토프");
         TEAM_NAME_MAP.put("FC Rubin Kazan", "루빈 카잔");
         TEAM_NAME_MAP.put("FC Ufa", "우파");
-        TEAM_NAME_MAP.put("FC Arsenal Tula", "아스날 툴라");
         TEAM_NAME_MAP.put("FC Akhmat Grozny", "아흐마트 그로즈니");
         TEAM_NAME_MAP.put("FC Ural Yekaterinburg", "우랄 예카테린부르크");
         TEAM_NAME_MAP.put("FC Sochi", "소치");
@@ -503,30 +502,8 @@ public class TeamNameMapper {
         TEAM_NAME_MAP.put("FC Vizela", "비젤라");
         TEAM_NAME_MAP.put("CF Estrela da Amadora", "에스트렐라 다 아마도라");
         
-        // Malmö FF 관련 추가 매핑 (다양한 표기법)
-        TEAM_NAME_MAP.put("Malmö FF", "말뫼");
-        TEAM_NAME_MAP.put("Malmo FF", "말뫼");
-        TEAM_NAME_MAP.put("Malmö Fotbollförening", "말뫼");
-        TEAM_NAME_MAP.put("Malmo Fotbollforening", "말뫼");
-        TEAM_NAME_MAP.put("Malmö", "말뫼");
-        TEAM_NAME_MAP.put("Malmo", "말뫼");
-        TEAM_NAME_MAP.put("MFF", "말뫼");
-        TEAM_NAME_MAP.put("Malmö FF (SWE)", "말뫼");
-        TEAM_NAME_MAP.put("Malmo FF (SWE)", "말뫼");
-        TEAM_NAME_MAP.put("Malmö FF (Sweden)", "말뫼");
-        TEAM_NAME_MAP.put("Malmo FF (Sweden)", "말뫼");
-        
-        // FC København 관련 추가 매핑
-        TEAM_NAME_MAP.put("FC København", "코펜하겐");
-        TEAM_NAME_MAP.put("FC Copenhagen", "코펜하겐");
-        TEAM_NAME_MAP.put("Copenhagen", "코펜하겐");
-        TEAM_NAME_MAP.put("København", "코펜하겐");
-        TEAM_NAME_MAP.put("Kobenhavn", "코펜하겐");
-        TEAM_NAME_MAP.put("FCK", "코펜하겐");
-        TEAM_NAME_MAP.put("FC København (DEN)", "코펜하겐");
-        TEAM_NAME_MAP.put("FC Copenhagen (DEN)", "코펜하겐");
-        TEAM_NAME_MAP.put("FC København (Denmark)", "코펜하겐");
-        TEAM_NAME_MAP.put("FC Copenhagen (Denmark)", "코펜하겐");
+    
+
     }
     
     /**
@@ -542,6 +519,24 @@ public class TeamNameMapper {
         String koreanName = TEAM_NAME_MAP.get(originalName.trim());
         return koreanName != null ? koreanName : originalName;
     }
+
+
+    public static String getEnglishName(String koreanName) {
+        System.out.println("Name: "+koreanName);
+        if (koreanName == null || koreanName.trim().isEmpty()) {
+            return koreanName;
+        }
+
+        // value(=한글명) → key(=영문명) 검색
+        for (Map.Entry<String, String> entry : TEAM_NAME_MAP.entrySet()) {
+            if (entry.getValue().equals(koreanName.trim())) {
+                return entry.getKey(); // 영문 팀명 반환
+            }
+        }
+
+        return koreanName; // 매핑 없으면 그대로 반환
+    }
+
     
     /**
      * 팀명 매핑에 새로운 팀 추가
