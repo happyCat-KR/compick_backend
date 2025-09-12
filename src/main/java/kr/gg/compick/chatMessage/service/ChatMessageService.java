@@ -54,6 +54,9 @@ public class ChatMessageService {
     @Transactional
     public ResponseData chatRegist(Long matchId, User user, String content){
         try {
+            System.out.println("matchId"+matchId);
+            System.out.println("userIdx"+user.getUserIdx());
+            System.out.println("content"+content);
             Matches matches = matchRepository.findById(matchId)
                 .orElseThrow(() -> new NoSuchElementException("Match not found"));
             ChatMessage chatMessage = ChatMessage.builder()
