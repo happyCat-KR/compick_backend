@@ -33,6 +33,8 @@ public class SecurityConfig {
             "/api/match/**",
             "/lb/who",
             "/api/board/**",
+            "/internal/**",
+            "/lb/who",
             "/internal/**"
     );
 
