@@ -1,6 +1,8 @@
 package kr.gg.compick.match.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -8,7 +10,7 @@ import java.util.Map;
  */
 public class TeamNameMapper {
     
-    private static final Map<String, String> TEAM_NAME_MAP = new HashMap<>();
+    public static final Map<String, String> TEAM_NAME_MAP = new HashMap<>();
     
     static {
     
@@ -536,6 +538,28 @@ public class TeamNameMapper {
 
         return koreanName; // 매핑 없으면 그대로 반환
     }
+
+/**
+ * 한글 이름 일부만 들어와도 검색되게 하는 메서드
+ */
+    public static List<String> findEnglishNames(String koreanKeyword) {
+    List<String> results = new ArrayList<>();
+    
+    if (koreanKeyword == null || koreanKeyword.trim().isEmpty()) {
+        return null; // 빈 리스트 반환
+    }
+
+    String keyword = koreanKeyword.trim();
+
+    for (Map.Entry<String, String> entry : TEAM_NAME_MAP.entrySet()) {
+        // value(한글명)에 keyword가 포함되면
+        if (entry.getValue().contains(keyword)) {
+            results.add(entry.getKey()); // 영문 팀명을 결과에 추가
+        }
+    }
+
+    return results;
+}
 
     
     /**

@@ -4,6 +4,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -157,13 +158,39 @@ public class MatchService {
         }
 
         // 👉 한글 입력이면 영어로 변환
-        String converted = TeamNameMapper.getEnglishName(keyword);
-        log.info("🔎 [SEARCH] raw keyword={}, converted={}", keyword, converted);
-        System.out.println("keyword: "+ keyword+" / converted: "+converted);
+        //String converted = TeamNameMapper.getEnglishName(keyword);
+        //log.info("🔎 [SEARCH] raw keyword={}, converted={}", keyword, converted);
+        //System.out.println("keyword: "+ keyword+" / converted: "+converted);
 
-        
+        //연관 키워드 모두 불러오기@
+        System.out.println("keyword: "+ keyword);
+        List<String> keySearchs = TeamNameMapper.findEnglishNames(keyword);
+
+        //검색 키워드가 없을 경우
+        if(keySearchs == null) {
+            return List.of();
+        }
+
+        //로그 임
+        System.out.println("검색된 수: "+keySearchs.size());
+        for(String t: keySearchs) {
+            System.out.println("체크해: "+t);
+        }
+
+        //검색 된 값이 존재 할 경우
+        List<MatchCardProjection> results =  new ArrayList<>();
+
+        //검색 된 값이 존재 했을 때 ( 연관 키워드를 모두 lists에 담아서 해당 검색된 갯수만큼 sql 한 번 더 호출 )
+        for(String li : keySearchs) {
+            List<MatchCardProjection> dbSearchs = matchRepository.searchMatchesByKeyword(li);
+            results.addAll(dbSearchs);
+        }
+
+
+        //searchs = matchRepository.searchMatchesByKeyword(converted);
+
         // 👉 부분 검색을 위해 % 추가
-        return matchRepository.searchMatchesByKeyword(converted);
+        return results;
     }
 
 
