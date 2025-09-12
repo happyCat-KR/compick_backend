@@ -157,10 +157,6 @@ public class MatchService {
             return List.of();
         }
 
-        // 👉 한글 입력이면 영어로 변환
-        //String converted = TeamNameMapper.getEnglishName(keyword);
-        //log.info("🔎 [SEARCH] raw keyword={}, converted={}", keyword, converted);
-        //System.out.println("keyword: "+ keyword+" / converted: "+converted);
 
         //연관 키워드 모두 불러오기@
         System.out.println("keyword: "+ keyword);
@@ -171,11 +167,6 @@ public class MatchService {
             return List.of();
         }
 
-        //로그 임
-        System.out.println("검색된 수: "+keySearchs.size());
-        for(String t: keySearchs) {
-            System.out.println("체크해: "+t);
-        }
 
         //검색 된 값이 존재 할 경우
         List<MatchCardProjection> results =  new ArrayList<>();
