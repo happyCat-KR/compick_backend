@@ -55,14 +55,14 @@ public class UserService {
             return ResponseData.error(500, "이미 존재하는 이메일입니다.");
         }
 
-        if (userRepository.existsByUserNickname(userRegistDTO.getUserName())) {
+        if (userRepository.existsByUserNickname(userRegistDTO.getNickname())) {
             return ResponseData.error(500, "이미 존재하는 닉네임입니다.");
         }
 
         User user = User.builder()
                 .userId(userRegistDTO.getUserId())
                 .password(userRegistDTO.getPassword())
-                .userNickname(userRegistDTO.getUserName())
+                .userNickname(userRegistDTO.getNickname())
                 .email(userRegistDTO.getEmail())
                 .build();
 

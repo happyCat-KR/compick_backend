@@ -10,5 +10,5 @@ import kr.gg.compick.domain.match.Matches;
 
 @Repository
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long>{
-    List<ChatMessage> findByMatchIdOrderByCreatedAtDesc(Matches matchId);
+        List<ChatMessage> findByMatches_MatchIdOrderByCreatedAtAsc(Long matchId);
 }
