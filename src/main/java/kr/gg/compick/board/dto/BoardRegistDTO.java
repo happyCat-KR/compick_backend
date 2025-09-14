@@ -2,7 +2,7 @@ package kr.gg.compick.board.dto;
 
 import java.util.List;
 
-
+import kr.gg.compick.match.dto.MatchTagDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,7 +15,7 @@ public class BoardRegistDTO {
     private String sport;
     private String league;
     private String content;
-    private List<String> matchtagName;
+    private List<MatchTagDTO> matchtagName;
     private String image;
 
 }

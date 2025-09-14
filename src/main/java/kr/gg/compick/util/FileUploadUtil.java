@@ -6,18 +6,26 @@ public class FileUploadUtil {
 
     // URL만 저장할 때는 단순히 검증 로직 정도만 수행
     public static String saveImageUrl(String url) {
-        String validUrl = "";
+        if (url == null || url.isBlank()) {
+        return null; // 사진이 없으면 null 반환
+    }
         List<String> allowedExtensions = List.of(".jpg", ".jpeg", ".png", ".gif", ".webp", ".jfif");
 
-        
-        String extension = url.substring(url.lastIndexOf(".")).toLowerCase();
-        if (allowedExtensions.contains(extension)) {
-            validUrl= url;
-        } else {
-            System.out.println("허용되지 않은 파일 형식: " + extension);
+         int dotIndex = url.lastIndexOf(".");
+        if (dotIndex == -1) {
+            System.out.println("확장자를 찾을 수 없는 URL: " + url);
+            return null;
         }
         
-        return validUrl;
+        String extension = url.substring(url.lastIndexOf(".")).toLowerCase();
+        
+        if (allowedExtensions.contains(extension)) {
+            return url;
+        } else {
+            System.out.println("허용되지 않은 파일 형식: " + extension);
+            return null;
+        }
+        
     }
 
     // private static final Path UPLOAD_DIR = Paths.get("C:", "autofeed_image_folder", "board_images");

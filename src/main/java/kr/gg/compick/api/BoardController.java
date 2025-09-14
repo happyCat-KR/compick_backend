@@ -28,17 +28,26 @@ public class BoardController {
 
     private final BoardService boardService;
 
+    @PostMapping("path")
+    public String postMethodName(@RequestBody String entity) {
+        
+        return entity;
+    }
+    
+
      // 게시글 작성
    @PostMapping(value = "/regist", consumes = MediaType.APPLICATION_JSON_VALUE)
         public ResponseEntity<ResponseData<?>> boardRegist(
             @AuthenticationPrincipal UserDetailsImpl principal,
             @RequestBody BoardRegistDTO dto
-        ) 
+        )         
         throws IOException {
             User user = principal.getUser();
             dto.setUserIdx(user.getUserIdx());
+            System.out.println("[보드 컨트롤러 도착]");
 
-            ResponseData<?> responseData = boardService.boardRegist(dto);       
+            ResponseData<?> responseData = boardService.boardRegist(dto);    
+            System.out.println("[보드 response 컨트롤러 도착 ]"+responseData);   
             return ResponseEntity.ok(responseData);
         }
 

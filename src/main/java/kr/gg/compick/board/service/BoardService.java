@@ -9,16 +9,15 @@ import jakarta.transaction.Transactional;
 import kr.gg.compick.board.dao.BoardRepository;
 import kr.gg.compick.board.dto.BoardRegistDTO;
 import kr.gg.compick.board.dto.BoardResponseDTO;
-import kr.gg.compick.boardmatch.dao.BoardMatchtagRepository;
-import kr.gg.compick.category.dao.CategoryRepository;
 import kr.gg.compick.category.service.CategoryService;
 import kr.gg.compick.domain.Media;
 import kr.gg.compick.domain.User;
 import kr.gg.compick.domain.board.Board;
-import kr.gg.compick.domain.board.BoardMatchtag;
-import kr.gg.compick.domain.board.BoardMatchtagId;
 import kr.gg.compick.domain.board.Category;
+import kr.gg.compick.domain.match.Matches;
 import kr.gg.compick.domain.user.Matchtag;
+import kr.gg.compick.match.dao.MatchRepository;
+import kr.gg.compick.match.dto.MatchTagDTO;
 import kr.gg.compick.matchtag.dao.MatchtagRepository;
 import kr.gg.compick.media.dao.MediaRepository;
 import kr.gg.compick.user.dao.UserRepository;
@@ -33,7 +32,7 @@ public class BoardService {
     private final UserRepository userRepository;
     private final MatchtagRepository matchtagRepository;
     private final MediaRepository mediaRepository;
-    private final BoardMatchtagRepository boardmatchtagRepository;
+    private final MatchRepository matchRepository;
     private final BoardRepository boardRepository;
     private final CategoryService categoryService;
     
@@ -56,39 +55,39 @@ public class BoardService {
             
     }    
 
-    @Transactional
-    private BoardMatchtag boardMatchtagInsert(Board savedBoard, String matchtagName) {
-        
-        Matchtag matchtag = matchtagRepository.findByMatchtagName(matchtagName)
-                .orElseThrow(() -> new IllegalArgumentException("해쉬태그가 없습니다."));
-
-        BoardMatchtagId boardMatchtagId = new BoardMatchtagId(
-                savedBoard.getBoardId(), matchtag.getMatchtagIdx());
-                BoardMatchtag boardMatchtag = BoardMatchtag.builder()
-                .id(boardMatchtagId)
-                .board(savedBoard)
-                .matchtag(matchtag)
-                .build();
-        return boardMatchtag;
-    }
 
     /*
      * 게시글 작성
      */
     @Transactional
     public ResponseData<?> boardRegist(BoardRegistDTO boardRegistDTO) throws IOException {  
-    // 1. Board 저장
-    Board savedBoard = boardRepository.save(boardInsert(boardRegistDTO));
+        System.out.println("[보드 서비스 도착]");
+        // 1. Board 저장
+        Board savedBoard = boardRepository.save(boardInsert(boardRegistDTO));
+        System.out.println("[보드 서비스 : board에 저장]");
+        // 2. 이미지 URL 검증
+        String savedImageUrl = null;
+        if (boardRegistDTO.getImage() != null) {
+            savedImageUrl = FileUploadUtil.saveImageUrl(boardRegistDTO.getImage());
+        }
 
-    // 2. 이미지 URL 검증
-    String savedImageUrl = FileUploadUtil.saveImageUrl(boardRegistDTO.getImage());
-    if (savedImageUrl != null) {
-        // ✅ Media 엔티티 바로 생성
-        String extension = "";
-        int dotIndex = savedImageUrl.lastIndexOf(".");
-        if (dotIndex > 0 && dotIndex < savedImageUrl.length() - 1) {
-            extension = savedImageUrl.substring(dotIndex + 1);
-}
+        if (savedImageUrl != null) {
+            Media media = Media.builder()
+                    .board(savedBoard)
+                    .fileUrl(savedImageUrl)
+                    .fileType(savedImageUrl.substring(savedImageUrl.lastIndexOf(".") + 1))
+                    .build();
+            mediaRepository.save(media);
+        }
+        System.out.println("[보드 ]");
+        if (savedImageUrl != null) {
+            // ✅ Media 엔티티 바로 생성
+            String extension = "";
+            System.out.println(savedImageUrl);
+            int dotIndex = savedImageUrl.lastIndexOf(".");
+            if (dotIndex > 0 && dotIndex < savedImageUrl.length() - 1) {
+                extension = savedImageUrl.substring(dotIndex + 1);
+        }   
         Media media = Media.builder()
                 .board(savedBoard)
                 .fileUrl(savedImageUrl)   // 바로 저장
@@ -96,13 +95,22 @@ public class BoardService {
                 .build();
         mediaRepository.save(media);
     }
+    
+      // 3. Matchtag 저장
+    List<MatchTagDTO> safeTags = boardRegistDTO.getMatchtagName() != null 
+            ? boardRegistDTO.getMatchtagName() 
+            : List.of();
 
-    List<String> safeTags = boardRegistDTO.getMatchtagName() != null 
-        ? boardRegistDTO.getMatchtagName() 
-        : List.of();
+    for (MatchTagDTO dto : safeTags) {
+        Matches match = matchRepository.findById(dto.getMatchId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 matchId: " + dto.getMatchId()));
 
-    for (String matchtagName : safeTags) {
-        boardmatchtagRepository.save(boardMatchtagInsert(savedBoard, matchtagName));
+        Matchtag matchtag = Matchtag.builder()
+                .board(savedBoard)
+                .match(match)
+                .build();
+
+        matchtagRepository.save(matchtag);
     }
 
     return ResponseData.success();

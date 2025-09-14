@@ -42,9 +42,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
+System.out.println("================================");
+    Enumeration<String> headerNames = req.getHeaderNames();
+
+    while (headerNames.hasMoreElements()) {
+        String headerName1 = headerNames.nextElement();
+        String headerValue = req.getHeader(headerName1);
+        System.out.println("[헤더] " + headerName1 + " = " + headerValue);
+    }
+
+System.out.println("================================");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         if (bearer != null && bearer.startsWith("Bearer ")) {
             token = bearer.substring(7);
-        }
+        }System.out.println("[보드]"+token);
 
         TokenCheck tc = tokenProvider.check(token);
         switch (tc.status()) {
@@ -64,9 +88,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             case EMPTY -> {req.setAttribute("jwt_error", "NO_TOKEN"); 
 
                 // Header 로그 찍기
-                Enumeration<String> headerNames = req.getHeaderNames();
-                while (headerNames.hasMoreElements()) {
-                    String headerName = headerNames.nextElement();
+                Enumeration<String> headerNames11 = req.getHeaderNames();
+                while (headerNames11.hasMoreElements()) {
+                    String headerName = headerNames11.nextElement();
                     String headerValue = req.getHeader(headerName);
                     
                 log.warn("[HEADER] {} = {}", headerName, headerValue);

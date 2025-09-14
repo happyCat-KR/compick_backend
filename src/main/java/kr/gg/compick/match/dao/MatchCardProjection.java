@@ -2,6 +2,7 @@ package kr.gg.compick.match.dao;
 
 import java.time.LocalDateTime;
 
+
 public interface MatchCardProjection {
     Long getMatchId();
     String getLeagueNickname();
@@ -18,4 +19,5 @@ public interface MatchCardProjection {
     Integer getAwayScore();
     LocalDateTime getStartTime();
     String getMatchStatus();
+
 }

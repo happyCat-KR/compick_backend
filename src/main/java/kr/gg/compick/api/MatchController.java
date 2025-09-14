@@ -90,11 +90,16 @@ public class MatchController {
     }
 
     // GET /api/match/search?keyword=...
-   @GetMapping("/search")
-        public ResponseEntity<List<MatchCardProjection>> searchMatches(
-                @RequestParam String keyword
-        ) {
-        return ResponseEntity.ok(matchService.searchMatches(keyword));
+        @GetMapping("/search")
+        public ResponseEntity<List<MatchCardDto>> searchMatches(@RequestParam String keyword) {
+                List<MatchCardProjection> projections = matchService.searchMatches(keyword);
+
+                // Projection → DTO 변환 (여기서 매핑 처리)
+                List<MatchCardDto> dtos = projections.stream()
+                        .map(MatchCardDto::new) // 생성자에서 TeamNameMapper 적용
+                        .toList();
+
+                return ResponseEntity.ok(dtos);
         }
 
     // PATCH /api/match/{sport}/{league}/teams/{teamId}/name

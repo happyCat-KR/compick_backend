@@ -168,6 +168,13 @@ public class MatchService {
         }
 
 
+        
+    
+
+
+
+        
+
         //검색 된 값이 존재 할 경우
         List<MatchCardProjection> results =  new ArrayList<>();
 
@@ -176,12 +183,18 @@ public class MatchService {
             List<MatchCardProjection> dbSearchs = matchRepository.searchMatchesByKeyword(li);
             results.addAll(dbSearchs);
         }
-
-
-        //searchs = matchRepository.searchMatchesByKeyword(converted);
-
-        // 👉 부분 검색을 위해 % 추가
+        
+        
         return results;
+        // for(MatchCardProjection li:results){
+        //     System.out.println(li);
+        // }
+
+
+        // //searchs = matchRepository.searchMatchesByKeyword(converted);
+
+        // // 👉 부분 검색을 위해 % 추가
+        // return results;
     }
 
 
