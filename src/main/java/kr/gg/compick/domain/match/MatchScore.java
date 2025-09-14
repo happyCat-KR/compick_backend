@@ -1,29 +1,24 @@
 package kr.gg.compick.domain.match;
 
 import jakarta.persistence.*;
-import kr.gg.compick.domain.match.MatchScoreId;
+import kr.gg.compick.domain.TeamInfo;
 import lombok.*;
 
 @Entity
-@Table(
-    name = "match_score",
-    indexes = {
-        @Index(name = "ix_score_match", columnList = "match_id"),
-        @Index(name = "ux_score_match_team", columnList = "match_id, team_id", unique = true)
-    }
-)
-@Data
-@NoArgsConstructor @AllArgsConstructor @Builder
+@Table(name = "match_score")
 @IdClass(MatchScoreId.class)
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class MatchScore {
 
     @Id
-    @Column(name = "match_id")
-    private Long matchId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "match_id")
+    private Matches match;
 
     @Id
-    @Column(name = "team_id")
-    private Long teamId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team_id")
+    private TeamInfo team;
 
     @Column(name = "score", nullable = false)
     private int score;

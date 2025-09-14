@@ -3,7 +3,6 @@ package kr.gg.compick.match.service;
 import kr.gg.compick.domain.TeamInfo;
 import kr.gg.compick.match.dao.TeamInfoRepository;
 import kr.gg.compick.match.dto.TeamInfoDto;
-import kr.gg.compick.match.util.TeamNameMapper;
 import kr.gg.compick.util.ResponseData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -4,7 +4,9 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
 import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,8 +17,10 @@ import kr.gg.compick.match.dao.MatchCalenderRepository;
 import kr.gg.compick.match.util.LeagueNameMapper;
 import kr.gg.compick.match.util.TeamNameMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class MatchService {
@@ -52,7 +56,7 @@ public class MatchService {
 
         .startTime(p.getStartTime())
         .matchStatus(p.getMatchStatus())
-        .leagueCode(LeagueNameMapper.toCode(p.getLeagueNickname()))
+        .leagueId(LeagueNameMapper.toCode(p.getLeagueNickname()))
         .build();
 }
 
@@ -145,6 +149,52 @@ public class MatchService {
             .stream()
             .map(this::toDto)
             .toList();      
+    }
+    
+
+    public List<MatchCardProjection > searchMatches(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return List.of();
+        }
+
+
+        //연관 키워드 모두 불러오기@
+        System.out.println("keyword: "+ keyword);
+        List<String> keySearchs = TeamNameMapper.findEnglishNames(keyword);
+
+        //검색 키워드가 없을 경우
+        if(keySearchs == null) {
+            return List.of();
+        }
+
+
+        
+    
+
+
+
+        
+
+        //검색 된 값이 존재 할 경우
+        List<MatchCardProjection> results =  new ArrayList<>();
+
+        //검색 된 값이 존재 했을 때 ( 연관 키워드를 모두 lists에 담아서 해당 검색된 갯수만큼 sql 한 번 더 호출 )
+        for(String li : keySearchs) {
+            List<MatchCardProjection> dbSearchs = matchRepository.searchMatchesByKeyword(li);
+            results.addAll(dbSearchs);
+        }
+        
+        
+        return results;
+        // for(MatchCardProjection li:results){
+        //     System.out.println(li);
+        // }
+
+
+        // //searchs = matchRepository.searchMatchesByKeyword(converted);
+
+        // // 👉 부분 검색을 위해 % 추가
+        // return results;
     }
 
 

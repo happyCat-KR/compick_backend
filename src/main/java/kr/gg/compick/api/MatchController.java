@@ -1,6 +1,7 @@
 package kr.gg.compick.api;
 
 import kr.gg.compick.match.dao.LeagueRepository;
+import kr.gg.compick.match.dao.MatchCardProjection;
 import kr.gg.compick.match.dto.MatchCardDto;
 import kr.gg.compick.match.dto.TeamInfoDto;
 import kr.gg.compick.match.service.MatchService;
@@ -21,7 +22,7 @@ import jakarta.annotation.PostConstruct;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/match/{sport}/{league}")
+@RequestMapping("/api/match")
 @RequiredArgsConstructor
 public class MatchController {
 
@@ -35,7 +36,7 @@ public class MatchController {
     }
 
     // GET /api/match/{sport}/{league}?start=...&end=...
-    @GetMapping(params = {"start", "end"})
+    @GetMapping(value="/{sport}/{league}/", params = {"start", "end"})
     public List<MatchCardDto> range(
             @PathVariable("sport") String sport,
             @PathVariable("league") String league,
@@ -48,7 +49,7 @@ public class MatchController {
     }
 
     // GET /api/match/{sport}/{league}/monthly?year=&month=
-    @GetMapping("/monthly")
+    @GetMapping("/{sport}/{league}/monthly")
     public ResponseEntity<List<MatchCardDto>> monthly(
             @PathVariable("sport") String sport,
             @PathVariable("league") String league,
@@ -65,7 +66,7 @@ public class MatchController {
     }
 
     // GET /api/match/{sport}/{league}/{matchId}
-    @GetMapping("/{matchId}")
+    @GetMapping("/{sport}/{league}/{matchId}")
     public MatchCardDto detail(
             @PathVariable("sport") String sport,
             @PathVariable("league") String league,
@@ -78,7 +79,7 @@ public class MatchController {
     }
 
     // GET /api/match/{sport}/{league}/teams/{teamId}
-    @GetMapping("/teams/{teamId}")
+    @GetMapping("/{sport}/{league}/teams/{teamId}")
     public ResponseEntity<ResponseData<TeamInfoDto>> getTeamById(
             @PathVariable("sport") String sport,
             @PathVariable("league") String league,
@@ -88,19 +89,21 @@ public class MatchController {
         return ResponseEntity.ok(teamInfoService.getTeamById(teamId));
     }
 
-    // GET /api/match/{sport}/{league}/teams/search?keyword=...
-    @GetMapping("/teams/search")
-    public ResponseEntity<ResponseData<List<TeamInfoDto>>> searchTeamsByName(
-            @PathVariable("sport") String sport,
-            @PathVariable("league") String league,
-            @RequestParam(name = "keyword") String keyword
-    ) {
-        log.info("[TEAM:SEARCH] sport={}, league={}, keyword={}", sport, league, keyword);
-        return ResponseEntity.ok(teamInfoService.searchTeamsByName(keyword));
-    }
+    // GET /api/match/search?keyword=...
+        @GetMapping("/search")
+        public ResponseEntity<List<MatchCardDto>> searchMatches(@RequestParam String keyword) {
+                List<MatchCardProjection> projections = matchService.searchMatches(keyword);
+
+                // Projection → DTO 변환 (여기서 매핑 처리)
+                List<MatchCardDto> dtos = projections.stream()
+                        .map(MatchCardDto::new) // 생성자에서 TeamNameMapper 적용
+                        .toList();
+
+                return ResponseEntity.ok(dtos);
+        }
 
     // PATCH /api/match/{sport}/{league}/teams/{teamId}/name
-    @PatchMapping("/teams/{teamId}/name")
+    @PatchMapping("/{sport}/{league}/teams/{teamId}/name")
     public ResponseEntity<ResponseData<TeamInfoDto>> updateTeamName(
             @PathVariable("sport") String sport,
             @PathVariable("league") String league,
@@ -113,7 +116,7 @@ public class MatchController {
     }
 
     // POST /api/match/{sport}/{league}/teams
-    @PostMapping("/teams")
+    @PostMapping("/{sport}/{league}/teams")
     public ResponseEntity<ResponseData<TeamInfoDto>> createTeam(
             @PathVariable("sport") String sport,
             @PathVariable("league") String league,
@@ -124,7 +127,7 @@ public class MatchController {
     }
 
     // GET /api/match/{sport}/{league}/h2h?home=&away=
-    @GetMapping("/h2h")
+    @GetMapping("/{sport}/{league}/h2h")
     public List<MatchCardDto> getHeadToHead(
             @PathVariable("sport") String sport,
             @PathVariable("league") String league,
@@ -142,7 +145,7 @@ public class MatchController {
     }
 
     // GET /api/match/{sport}/{league}/recent/home?teamId=
-    @GetMapping("/recent/home")
+    @GetMapping("/{sport}/{league}/recent/home")
     public List<MatchCardDto> getHomeRecent(
             @PathVariable("sport") String sport,
             @PathVariable("league") String league,
@@ -156,7 +159,7 @@ public class MatchController {
     }
 
     // GET /api/match/{sport}/{league}/recent/away?teamId=
-    @GetMapping("/recent/away")
+    @GetMapping("/{sport}/{league}/recent/away")
     public List<MatchCardDto> getAwayRecent(
             @PathVariable("sport") String sport,
             @PathVariable("league") String league,

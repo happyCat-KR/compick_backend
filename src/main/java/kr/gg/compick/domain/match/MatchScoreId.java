@@ -7,6 +7,6 @@ import lombok.*;
 @Data
 @NoArgsConstructor @AllArgsConstructor @EqualsAndHashCode
 public class MatchScoreId implements Serializable {
-    private Long matchId;
-    private Long teamId;
+    private Long match;
+    private Long team;
 }

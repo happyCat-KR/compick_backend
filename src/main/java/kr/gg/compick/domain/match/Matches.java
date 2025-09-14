@@ -5,6 +5,8 @@ import kr.gg.compick.domain.League;
 import kr.gg.compick.domain.TeamInfo;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(
@@ -42,4 +44,7 @@ public class Matches {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "status_code", referencedColumnName = "code")
     private MatchStatus status;
+
+    @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MatchScore> scores = new ArrayList<>();    
 }

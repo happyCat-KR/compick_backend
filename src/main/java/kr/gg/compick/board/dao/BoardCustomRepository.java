@@ -10,5 +10,5 @@ public interface BoardCustomRepository {
     List<BoardViewDTO> findBoardsByMatchtag(String matchtag);
     List<BoardViewDTO> findBoardsByContentKeyword(String userIdPrefix);
     BoardViewDTO findDetailBoard(Long boardIdx);
-    List<BoardViewDTO> findRepliesOfBoard(Long parentIdx);
+    // List<BoardViewDTO> findRepliesOfBoard(Long parentIdx);
 }
