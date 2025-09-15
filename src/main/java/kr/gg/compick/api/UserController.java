@@ -5,8 +5,10 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -132,6 +134,13 @@ public class UserController {
                     .badRequest()
                     .body(Map.of("success", false, "message", "수정 실패"));
         }
+    }
+    
+    @DeleteMapping("/delete")
+        public ResponseEntity<ResponseData<Void>> deleteUser(@AuthenticationPrincipal UserDetailsImpl principal) {
+        Long userIdx = principal.getUser().getUserIdx();
+        userService.deleteUser(userIdx);
+        return ResponseEntity.ok(ResponseData.success("회원탈퇴 완료", null));
     }
 
 

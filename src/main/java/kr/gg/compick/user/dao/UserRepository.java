@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import kr.gg.compick.domain.User;
 
@@ -15,7 +16,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByUserId(String userId);
     boolean existsByEmail(String email);
     boolean existsByUserNickname(String nickname);
-
+     
+    @Modifying
+    @Transactional
+    void deleteByUserIdx(Long userIdx); // 문자열 userId로 삭제
     
     Optional<User> findByEmail(String email);
 

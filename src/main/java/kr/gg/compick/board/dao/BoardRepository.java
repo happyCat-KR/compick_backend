@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import kr.gg.compick.board.dto.BoardResponseDTO;
 import kr.gg.compick.domain.board.Board;
@@ -47,4 +48,8 @@ GROUP BY bo.boardId, u.userNickname, u.profileImage, bo.content, me.fileUrl, bo.
 """)
 List<BoardResponseDTO> findBoardsDynamic(@Param("categoryIdx") String categoryIdx);
 
+
+     @Modifying
+    @Transactional
+    void deleteByUser_UserIdx(Long userIdx);
 }

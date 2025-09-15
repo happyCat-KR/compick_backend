@@ -9,6 +9,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
+import kr.gg.compick.board.dao.BoardLikeRepository;
+import kr.gg.compick.board.dao.BoardRepository;
 import kr.gg.compick.domain.User;
 import kr.gg.compick.domain.UserOauth;
 import kr.gg.compick.domain.UserOauthId;
@@ -31,6 +33,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenService refreshTokenService;
+    private final BoardRepository boardRepository;
+    private final BoardLikeRepository boardLikeRepository;
 
     public record AuthTokens(
         String accessToken,
@@ -170,6 +174,22 @@ public class UserService {
         } else {
             return null;
         }
+    }
+
+    // 회원탈퇴
+    @Transactional
+    public void deleteUser(Long userIdx) {
+       
+            // 1. 유저 관련 데이터 삭제 (순서 중요!)
+            boardLikeRepository.deleteByUserIdx(userIdx);
+            // voteRepository.deleteByUserId(userId);
+            // commentRepository.deleteByUserId(userId);
+            boardRepository.deleteByUser_UserIdx(userIdx);
+            
+            // 2. 마지막으로 유저 삭제
+            userRepository.deleteByUserIdx(userIdx);
+
+       
     }
 
 }
