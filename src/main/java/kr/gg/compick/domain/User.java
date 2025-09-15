@@ -37,9 +37,9 @@ public class User {
   @Column(name = "bio", length = 255)
   private String bio;
 
-  @Builder.Default
-  @Column(name = "profile_image", length = 255, nullable = false)
-  private String profileImage = "https://search2.kakaocdn.net/argon/656x0_80_wr/IloiKtAKa0F";
+ 
+  @Column(columnDefinition = "LONGTEXT")
+  private String profileImage ;
 
   @Builder.Default
   @Column(name = "del_check", nullable = false)
@@ -55,4 +55,7 @@ public class User {
 
   @Column(name = "deleted_at")
   private LocalDateTime deletedAt;
+
+  @Column(length = 500)
+    private String introduction; 
 }

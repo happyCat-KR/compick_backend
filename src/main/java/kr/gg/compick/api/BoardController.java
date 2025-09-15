@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartRequest;
 
 import kr.gg.compick.board.dto.BoardRegistDTO;
 import kr.gg.compick.board.dto.BoardResponseDTO;
@@ -92,4 +93,9 @@ public class BoardController {
     //     return ResponseEntity.ok(dto);
     // }
    
+
+    @PostMapping("/image/regist")
+    public void imageRegist(MultipartRequest req) {
+        System.out.println("너 왔니~");
+    }
 }

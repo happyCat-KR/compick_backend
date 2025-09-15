@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
@@ -17,6 +18,7 @@ import kr.gg.compick.security.jwt.JwtTokenProvider;
 import kr.gg.compick.user.dao.UserRepository;
 import kr.gg.compick.user.dto.LoginDTO;
 import kr.gg.compick.user.dto.UserRegistDTO;
+import kr.gg.compick.user.dto.UserUpdateDTO;
 import kr.gg.compick.userOauth.dao.UserOauthRepository;
 import kr.gg.compick.util.NicknameGenerator;
 import kr.gg.compick.util.ResponseData;
@@ -34,6 +36,16 @@ public class UserService {
         String accessToken,
         IssuedRefresh refresh
     ) {}
+    private final PasswordEncoder passwordEncoder;
+
+     // 비밀번호 검증
+    public boolean checkPassword(String userId, String rawPassword) {
+        System.out.println("[유저아이디 ] : "+userId);
+        System.out.println("[입력한 패스워드값 ] : "+rawPassword);
+        return userRepository.findByUserId(userId)
+                .map(user -> passwordEncoder.matches(rawPassword, user.getPassword()))
+                .orElse(false);
+    }
 
     public String generateUnique(int maxTries) {
         for (int i = 0; i < maxTries; i++) {
@@ -58,10 +70,11 @@ public class UserService {
         if (userRepository.existsByUserNickname(userRegistDTO.getNickname())) {
             return ResponseData.error(500, "이미 존재하는 닉네임입니다.");
         }
+        String encodedPassword = passwordEncoder.encode(userRegistDTO.getPassword());
 
         User user = User.builder()
                 .userId(userRegistDTO.getUserId())
-                .password(userRegistDTO.getPassword())
+                .password(encodedPassword)
                 .userNickname(userRegistDTO.getNickname())
                 .email(userRegistDTO.getEmail())
                 .build();
@@ -112,7 +125,7 @@ public class UserService {
     public ResponseData loginNomal(LoginDTO loginDTO, String ip, String userAgent) {
         return userRepository.findByUserId(loginDTO.getUserId())
                 .map(user -> {
-                    if (!loginDTO.getPassword().equals(user.getPassword())) {
+                    if (!passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
                         return ResponseData.error(401, "비밀번호가 일치하지 않습니다.");
                     }
                     // 1) AcessToken 발급
@@ -138,6 +151,25 @@ public class UserService {
         return userRepository.existsByUserNickname(nickname)
                 ? ResponseData.error(500, "이미 존재하는 닉네임입니다.")
                 : ResponseData.success("사용 가능한 닉네임입니다.");
+    }
+
+
+
+    // 회원정보 수정
+    @Transactional
+    public User updateUser(String userId, UserUpdateDTO dto) {
+        int updated = userRepository.updateUserInfo(
+                userId,
+                dto.getNickname(),
+                dto.getIntroduction(),
+                dto.getProfileImg()
+        );
+
+        if (updated > 0) {
+            return userRepository.findByUserId(userId).orElse(null); // ✅ userId 기반 조회
+        } else {
+            return null;
+        }
     }
 
 }

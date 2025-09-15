@@ -17,9 +17,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
-import kr.gg.compick.domain.Media;
 import kr.gg.compick.domain.User;
-import kr.gg.compick.domain.match.Matches;
 import kr.gg.compick.domain.user.Matchtag;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -71,7 +69,7 @@ public class Board {
     @JoinColumn(name = "category_idx")
     private Category category;
 
-      @Column(nullable = false)
+    @Column(nullable = false)
     private int views = 0;
 
     private String alert1;

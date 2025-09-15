@@ -36,7 +36,6 @@ public class BoardResponseDTO{
                         LocalDateTime createdAt,
                         String sport,
                         String league,
-                        int viewCount,
                         long likeCount,
                         boolean likedByMe) {
         this.boardId = boardId;
@@ -47,7 +46,6 @@ public class BoardResponseDTO{
         this.createdAt = createdAt;
         this.sport = sport;
         this.league = league;
-        this.viewCount = viewCount;
         this.likeCount = likeCount;
         this.likedByMe = likedByMe;
     }
