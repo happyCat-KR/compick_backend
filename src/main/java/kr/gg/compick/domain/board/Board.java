@@ -17,6 +17,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import kr.gg.compick.domain.Media;
 import kr.gg.compick.domain.User;
 import kr.gg.compick.domain.match.Matches;
 import kr.gg.compick.domain.user.Matchtag;
@@ -42,6 +43,11 @@ public class Board {
     @JoinColumn(name = "user_idx", nullable = false)
     private User user;
 
+    
+    @Column(columnDefinition = "TEXT")
+    private String title;
+
+
     @Column(columnDefinition = "TEXT")
     private String content;
 
@@ -64,6 +70,9 @@ public class Board {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_idx")
     private Category category;
+
+      @Column(nullable = false)
+    private int views = 0;
 
     private String alert1;
     private String alert2;

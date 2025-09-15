@@ -14,6 +14,7 @@ public class BoardRegistDTO {
     private Long userIdx;
     private String sport;
     private String league;
+    private String title;
     private String content;
     private List<MatchTagDTO> matchtagName;
     private String image;

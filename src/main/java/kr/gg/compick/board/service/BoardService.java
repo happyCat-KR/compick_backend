@@ -49,22 +49,31 @@ public class BoardService {
 
     return Board.builder()
             .user(user)
+            .title(boardRegistDTO.getTitle())
             .content(boardRegistDTO.getContent())
             .category(category)   // ✅ Category 엔티티로 조인
             .build();
             
     }    
+    // @Transactional
+    // public BoardResponseDTO getBoardDetail(Long boardId) {
+    //     // ✅ 조회수 증가
+    //     boardRepository.incrementViews(boardId);
 
+    //     // ✅ 게시글 상세 조회
+    //     Board board = boardRepository.findById(boardId)
+    //                       .orElseThrow(() -> new RuntimeException("게시글 없음"));
+
+    //     return new BoardResponseDTO(board);
+    // }
 
     /*
      * 게시글 작성
      */
     @Transactional
     public ResponseData<?> boardRegist(BoardRegistDTO boardRegistDTO) throws IOException {  
-        System.out.println("[보드 서비스 도착]");
         // 1. Board 저장
         Board savedBoard = boardRepository.save(boardInsert(boardRegistDTO));
-        System.out.println("[보드 서비스 : board에 저장]");
         // 2. 이미지 URL 검증
         String savedImageUrl = null;
         if (boardRegistDTO.getImage() != null) {
@@ -79,7 +88,6 @@ public class BoardService {
                     .build();
             mediaRepository.save(media);
         }
-        System.out.println("[보드 ]");
         if (savedImageUrl != null) {
             // ✅ Media 엔티티 바로 생성
             String extension = "";
@@ -119,7 +127,23 @@ public class BoardService {
     
     /* 게시글 조회 */
     public List<BoardResponseDTO> getBoardsList(String sport, String league) {
-        return boardRepository.findBoardsDynamic(sport, league);
+        String sportdb= "all";
+        if("soccer".equals(sport)) { sportdb = "축구";}
+        else if("baseball".equals(sport)){sportdb = "야구";}
+        else if("mma".equals(sport)){sportdb = "MM";}
+        else {sportdb= "al";}
+
+        String leaguedb = "0";
+        if("laliga".equals(league)){leaguedb = "1";}
+        else if("ucl".equals(league)){leaguedb="2";}
+        else if("epl".equals(league)){leaguedb="3";}
+        else if("kbo".equals(league)){leaguedb="4";}
+        else if("ufc".equals(league)){leaguedb="5";}
+        else{
+            leaguedb="0";
+        }
+        String categoryIdx = sportdb + leaguedb;
+        return boardRepository.findBoardsDynamic(categoryIdx);
     }
 }
 
