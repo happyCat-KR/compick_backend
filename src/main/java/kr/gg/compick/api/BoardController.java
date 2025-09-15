@@ -86,10 +86,10 @@ public class BoardController {
         System.out.println("");
         return ResponseEntity.ok(boards);
     }
-@GetMapping("/{boardId}")
-public ResponseEntity<BoardResponseDTO> getBoardDetail(@PathVariable Long boardId) {
-    BoardResponseDTO dto = boardService.getBoardDetail(boardId);
-    return ResponseEntity.ok(dto);
-}
+    // @GetMapping("/{boardId}")
+    // public ResponseEntity<BoardResponseDTO> getBoardDetail(@PathVariable Long boardId) {
+    //     BoardResponseDTO dto = boardService.getBoardDetail(boardId);
+    //     return ResponseEntity.ok(dto);
+    // }
    
 }
