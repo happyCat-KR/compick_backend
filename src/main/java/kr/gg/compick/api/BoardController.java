@@ -75,13 +75,12 @@ public class BoardController {
     }
 
  @GetMapping("/list")
-    public ResponseEntity<List<BoardResponseDTO>> getBoardList(
+    public ResponseEntity<ResponseData> getBoardList(
             @RequestParam(required = false) String sport,
             @RequestParam(required = false) String league
     ) {
-        List<BoardResponseDTO> boards = boardService.getBoardsList(sport, league);
-        System.out.println("[보드 목록 컨트롤러]"+boards);
-        return ResponseEntity.ok(boards);
+        //List<BoardResponseDTO> boards = boardService.getBoardsList(sport, league);
+        return ResponseEntity.ok(ResponseData.success());
     }
     // @GetMapping("/{boardId}")
     // public ResponseEntity<BoardResponseDTO> getBoardDetail(@PathVariable Long boardId) {
