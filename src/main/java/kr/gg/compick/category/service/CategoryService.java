@@ -19,10 +19,10 @@ public class CategoryService {
     private final SportRepository sportRepository;
    
       @Transactional
-    public Category getOrCreateCategory(String sportCode, String leagueName) {
+    public Category getOrCreateCategory(String sportName, String leagueName) {
         // ✅ Sport 엔티티 조회 (예: "SOCCER" 코드로 조회)
-        Sport sport = sportRepository.findBySportCode(sportCode)
-                .orElseThrow(() -> new IllegalArgumentException("Sport not found: " + sportCode));
+        Sport sport = sportRepository.findBySportName(sportName)
+                .orElseThrow(() -> new IllegalArgumentException("Sport not found: " + sportName));
 
         // ✅ League 엔티티 조회 (예: "EPL" 이름으로 조회)
         League league = leagueRepository.findByLeagueName(leagueName)

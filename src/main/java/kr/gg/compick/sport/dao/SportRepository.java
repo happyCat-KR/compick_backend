@@ -11,5 +11,5 @@ import kr.gg.compick.domain.Sport;
 @Repository
 public interface SportRepository extends JpaRepository<Sport, Long> {
     
-   Optional<Sport> findBySportCode(String sportCode);
+   Optional<Sport> findBySportName(String sportName);
 }
