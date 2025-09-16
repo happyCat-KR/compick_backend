@@ -1,5 +1,6 @@
 package kr.gg.compick.api;
 
+import kr.gg.compick.comment.dto.CommentResponseDTO;
 import kr.gg.compick.comment.service.CommentService;
 import kr.gg.compick.domain.User;
 import kr.gg.compick.domain.board.Board;
@@ -26,8 +27,7 @@ public class CommentController {
     public Comment writeComment(
             @PathVariable Long boardId,
             @RequestParam String content,
-            @AuthenticationPrincipal UserDetailsImpl principal
-    ) {
+            @AuthenticationPrincipal UserDetailsImpl principal) {
         String userId = principal.getUser().getUserId();
         User freshUser = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
@@ -40,19 +40,27 @@ public class CommentController {
 
     // 게시글별 댓글 조회 (누구나 가능)
     @GetMapping("/{boardId}")
-    public List<Comment> getComments(@PathVariable Long boardId) {
+    public List<CommentResponseDTO> getComments(@PathVariable("boardId") Long boardId) {
         Board board = new Board();
         board.setBoardId(boardId);
-        return commentService.getComments(board);
+
+        return commentService.getComments(board)
+                .stream()
+                .map(CommentResponseDTO::fromEntity)
+                .toList();
     }
 
     // 로그인된 사용자가 작성한 댓글 조회
     @GetMapping("/me")
-    public List<Comment> getMyComments(@AuthenticationPrincipal UserDetailsImpl principal) {
+    public List<CommentResponseDTO> getMyComments(@AuthenticationPrincipal UserDetailsImpl principal) {
         String userId = principal.getUser().getUserId();
         User freshUser = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        return commentService.getCommentsByUser(freshUser);
+        return commentService.getCommentsByUser(freshUser)
+                .stream()
+                .map(CommentResponseDTO::fromEntity)
+                .toList();
     }
+
 }
