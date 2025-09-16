@@ -51,6 +51,6 @@ public class Media {
     @Column(name = "uploaded_at")
     private LocalDateTime uploadedAt = LocalDateTime.now();
 
-
+ 
     private boolean delCheck = false;
 }
