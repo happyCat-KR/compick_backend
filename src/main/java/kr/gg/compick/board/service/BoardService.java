@@ -95,8 +95,8 @@ public ResponseData<?> boardRegist(BoardRegistDTO dto) throws IOException {
     return ResponseData.success("게시글 등록 성공", savedBoard.getBoardId());
 }
 
-    
-    /* 게시글 조회 */
+    /*
+    // 게시글 조회 
    public List<BoardResponseDTO> getBoardsList(String sport, String league) {
     String sportdb = switch (sport) {
         case "soccer" -> "축구";
@@ -128,6 +128,7 @@ List<BoardResponseDTO> boards = boardRepository.findBoardsDynamic(categoryIdx);
 
     return boards;
     }
+     */
 }
 
     // @Transactional
