@@ -26,27 +26,25 @@ SELECT new kr.gg.compick.board.dto.BoardResponseDTO(
     bo.title,
     bo.content,
     me.fileUrl,
+    null, 
     bo.createdAt,
     c.sport.sportName,
     c.league.leagueNickname,
     COUNT(bl),
-    false   
+    false
 )
 FROM Board bo
-JOIN Media me ON me.board = bo 
 JOIN bo.user u
 JOIN bo.category c
-LEFT JOIN BoardLike bl ON bl.boardId = bo.boardId AND bl.delCheck = false
-WHERE
-    (
-        :categoryIdx IS NULL
-        OR LOWER(:categoryIdx) = 'al0'
-        OR LOWER(c.categoryIdx) = LOWER(:categoryIdx)
-    )
-GROUP BY bo.boardId, u.userNickname, u.profileImage, bo.content, me.fileUrl, bo.createdAt,
-         c.sport.sportName, c.league.leagueNickname
+LEFT JOIN bo.mediaList me
+LEFT JOIN BoardLike bl ON bl.board = bo AND bl.delCheck = false
+WHERE (:categoryIdx IS NULL OR LOWER(:categoryIdx) = 'al0' OR LOWER(c.categoryIdx) = LOWER(:categoryIdx))
+GROUP BY bo.boardId, u.userNickname, u.profileImage, bo.title, bo.content,
+         me.fileUrl, me.fileData, bo.createdAt, c.sport.sportName, c.league.leagueNickname
 """)
 List<BoardResponseDTO> findBoardsDynamic(@Param("categoryIdx") String categoryIdx);
+
+
 
 
      @Modifying

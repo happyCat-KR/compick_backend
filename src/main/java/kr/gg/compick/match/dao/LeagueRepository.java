@@ -9,7 +9,7 @@ import kr.gg.compick.domain.League;
 import java.util.List;
 import java.util.Optional;
 public interface LeagueRepository extends JpaRepository<League, Long> {
-
+Optional<League> findByLeagueName(String leagueName);
   @Query("""
   SELECT l.leagueId
   FROM League l

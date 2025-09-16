@@ -9,45 +9,39 @@ import kr.gg.compick.domain.Sport;
 import kr.gg.compick.domain.board.Category;
 import kr.gg.compick.match.dao.LeagueRepository;
 import lombok.RequiredArgsConstructor;
+import kr.gg.compick.sport.dao.SportRepository; 
 
 @Service
 @RequiredArgsConstructor
 public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final LeagueRepository leagueRepository;
-    @Transactional
-    public Category getOrCreateCategory(String sportName, String leagueNickname) {
-        String sportCode = sportName.substring(0, 2).toLowerCase();
-        Long leagueId;
+    private final SportRepository sportRepository;
+   
+      @Transactional
+    public Category getOrCreateCategory(String sportCode, String leagueName) {
+        // ✅ Sport 엔티티 조회 (예: "SOCCER" 코드로 조회)
+        Sport sport = sportRepository.findBySportCode(sportCode)
+                .orElseThrow(() -> new IllegalArgumentException("Sport not found: " + sportCode));
 
-        switch (leagueNickname) {
-            case "all": leagueId = 0L; break;
-            case "laliga": leagueId = 1L; break;
-            case "ucl": leagueId = 2L; break;
-            case "epl": leagueId = 3L; break;
-            case "kbo": leagueId = 4L; break;
-            case "ufc": leagueId = 5L; break;
-            default: throw new IllegalArgumentException("지원하지 않는 리그: " + leagueNickname);
-        }
+        // ✅ League 엔티티 조회 (예: "EPL" 이름으로 조회)
+        League league = leagueRepository.findByLeagueName(leagueName)
+                .orElseThrow(() -> new IllegalArgumentException("League not found: " + leagueName));
 
-        String categoryIdx = sportCode + leagueId;
+        // ✅ categoryIdx 생성 규칙
+        String categoryIdx = sport.getSportCode().substring(0, 2).toUpperCase() 
+                           + "_" + league.getLeagueName().toUpperCase();
 
-        // ✅ DB에서 먼저 조회
-       return categoryRepository.findById(categoryIdx)
-            .orElseGet(() -> {
-                // 없으면 새로 생성
-                League league = leagueRepository.findById(Long.valueOf(leagueId))
-                        .orElseThrow(() -> new IllegalArgumentException("리그를 찾을 수 없습니다: " + leagueNickname));
-
-                Sport sport = league.getSport(); // League가 Sport와 조인되어 있다고 가정
-
-                Category newCategory = new Category();
-                newCategory.setCategoryIdx(categoryIdx);
-                newCategory.setLeague(league);   // ✅ league_id 세팅
-                newCategory.setSport(sport);     // ✅ sport_id 세팅
-
-                return categoryRepository.save(newCategory);
-            });
+        // ✅ DB에 이미 존재하면 반환, 없으면 새로 생성
+        return categoryRepository.findById(categoryIdx)
+                .orElseGet(() -> {
+                    Category newCategory = Category.builder()
+                            .categoryIdx(categoryIdx)
+                            .sport(sport)   // ✅ 엔티티 넣기
+                            .league(league) // ✅ 엔티티 넣기
+                            .build();
+                    return categoryRepository.save(newCategory);
+                });
     }
 
 }

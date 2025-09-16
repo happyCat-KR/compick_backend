@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,21 +41,16 @@ public class BoardController {
     }
     
 
-     // 게시글 작성
-   @PostMapping(value = "/regist", consumes = MediaType.APPLICATION_JSON_VALUE)
-        public ResponseEntity<ResponseData<?>> boardRegist(
-            @AuthenticationPrincipal UserDetailsImpl principal,
-            @RequestBody BoardRegistDTO dto
-        )         
-        throws IOException {
-            User user = principal.getUser();
-            dto.setUserIdx(user.getUserIdx());
-            System.out.println("[보드 컨트롤러 도착]");
-
-            ResponseData<?> responseData = boardService.boardRegist(dto);    
-            System.out.println("[보드 response 컨트롤러 도착 ]"+responseData);   
-            return ResponseEntity.ok(responseData);
-        }
+   // 게시글 작성
+    @PostMapping(value = "/regist", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseData<?>> boardRegist(
+        @AuthenticationPrincipal UserDetailsImpl principal,
+        @ModelAttribute BoardRegistDTO dto
+    ) throws IOException {
+        dto.setUserIdx(principal.getUser().getUserIdx());
+        ResponseData<?> responseData = boardService.boardRegist(dto);
+        return ResponseEntity.ok(responseData);
+    }
 
 
     @PostMapping("/{boardId}/like")
@@ -84,7 +80,7 @@ public class BoardController {
             @RequestParam(required = false) String league
     ) {
         List<BoardResponseDTO> boards = boardService.getBoardsList(sport, league);
-        System.out.println("");
+        System.out.println("[보드 목록 컨트롤러]"+boards);
         return ResponseEntity.ok(boards);
     }
     // @GetMapping("/{boardId}")

@@ -3,11 +3,18 @@ package kr.gg.compick.domain.board;
 import jakarta.persistence.*;
 import kr.gg.compick.domain.League;
 import kr.gg.compick.domain.Sport;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 
+import java.time.LocalDateTime;
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // JPA 기본 생성자
+@AllArgsConstructor // 모든 필드 생성자
+@Builder
 @Entity
 @Table(name = "category")
 @Getter
