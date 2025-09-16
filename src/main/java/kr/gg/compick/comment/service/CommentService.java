@@ -26,9 +26,15 @@ public class CommentService {
         return commentRepository.save(comment);
     }
 
-    // 댓글 목록 조회
+    // 게시글별 댓글 조회
     @Transactional(readOnly = true)
     public List<Comment> getComments(Board board) {
         return commentRepository.findByBoardOrderByCreatedAtAsc(board);
+    }
+
+    // 유저별 댓글 조회
+    @Transactional(readOnly = true)
+    public List<Comment> getCommentsByUser(User user) {
+        return commentRepository.findByUserOrderByCreatedAtDesc(user);
     }
 }
