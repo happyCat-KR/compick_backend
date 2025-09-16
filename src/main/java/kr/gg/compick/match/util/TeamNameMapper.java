@@ -267,7 +267,6 @@ public class TeamNameMapper {
         TEAM_NAME_MAP.put("Lokomotiv Moscow", "로코모티프 모스크바");
         TEAM_NAME_MAP.put("Krasnodar", "크라스노다르");
         TEAM_NAME_MAP.put("Rostov", "로스토프");
-        TEAM_NAME_MAP.put("Kairat Almaty", "카라이트 알마티");
         TEAM_NAME_MAP.put("FC Milsami Orhei", "밀사미 오르헤이");
         TEAM_NAME_MAP.put("FC Noah", "노아");
         TEAM_NAME_MAP.put("Kairat Almaty", "카라이트 알마티");

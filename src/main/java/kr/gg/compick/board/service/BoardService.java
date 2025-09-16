@@ -1,6 +1,7 @@
 package kr.gg.compick.board.service;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -49,77 +50,83 @@ public class BoardService {
 
     return Board.builder()
             .user(user)
+            .category(category)
+            .title(boardRegistDTO.getTitle())
             .content(boardRegistDTO.getContent())
-            .category(category)   // ✅ Category 엔티티로 조인
             .build();
             
     }    
+    // @Transactional
+    // public BoardResponseDTO getBoardDetail(Long boardId) {
+    //     // ✅ 조회수 증가
+    //     boardRepository.incrementViews(boardId);
 
+    //     // ✅ 게시글 상세 조회
+    //     Board board = boardRepository.findById(boardId)
+    //                       .orElseThrow(() -> new RuntimeException("게시글 없음"));
+
+    //     return new BoardResponseDTO(board);
+    // }
 
     /*
      * 게시글 작성
      */
-    @Transactional
-    public ResponseData<?> boardRegist(BoardRegistDTO boardRegistDTO) throws IOException {  
-        System.out.println("[보드 서비스 도착]");
-        // 1. Board 저장
-        Board savedBoard = boardRepository.save(boardInsert(boardRegistDTO));
-        System.out.println("[보드 서비스 : board에 저장]");
-        // 2. 이미지 URL 검증
-        String savedImageUrl = null;
-        if (boardRegistDTO.getImage() != null) {
-            savedImageUrl = FileUploadUtil.saveImageUrl(boardRegistDTO.getImage());
-        }
+ @Transactional
+public ResponseData<?> boardRegist(BoardRegistDTO dto) throws IOException {
+    // 1. Board 저장
+    Board newBoard = boardInsert(dto);
+    Board savedBoard = boardRepository.save(newBoard);
+    String fileUrl = "/uploads/posts/" + dto.getFile().getOriginalFilename();
 
-        if (savedImageUrl != null) {
-            Media media = Media.builder()
-                    .board(savedBoard)
-                    .fileUrl(savedImageUrl)
-                    .fileType(savedImageUrl.substring(savedImageUrl.lastIndexOf(".") + 1))
-                    .build();
-            mediaRepository.save(media);
-        }
-        System.out.println("[보드 ]");
-        if (savedImageUrl != null) {
-            // ✅ Media 엔티티 바로 생성
-            String extension = "";
-            System.out.println(savedImageUrl);
-            int dotIndex = savedImageUrl.lastIndexOf(".");
-            if (dotIndex > 0 && dotIndex < savedImageUrl.length() - 1) {
-                extension = savedImageUrl.substring(dotIndex + 1);
-        }   
+    // 2. 이미지 저장
+    if (dto.getFile() != null && !dto.getFile().isEmpty()) {
         Media media = Media.builder()
                 .board(savedBoard)
-                .fileUrl(savedImageUrl)   // 바로 저장
-                .fileType(extension)
+                .fileName(dto.getFile().getOriginalFilename())
+                .fileType(dto.getFile().getContentType())
+                .fileData(dto.getFile().getBytes())
+                .fileUrl(fileUrl)
+                .delCheck(false)
                 .build();
+
         mediaRepository.save(media);
     }
-    
-      // 3. Matchtag 저장
-    List<MatchTagDTO> safeTags = boardRegistDTO.getMatchtagName() != null 
-            ? boardRegistDTO.getMatchtagName() 
-            : List.of();
 
-    for (MatchTagDTO dto : safeTags) {
-        Matches match = matchRepository.findById(dto.getMatchId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 matchId: " + dto.getMatchId()));
-
-        Matchtag matchtag = Matchtag.builder()
-                .board(savedBoard)
-                .match(match)
-                .build();
-
-        matchtagRepository.save(matchtag);
-    }
-
-    return ResponseData.success();
+    return ResponseData.success("게시글 등록 성공", savedBoard.getBoardId());
 }
 
     
     /* 게시글 조회 */
-    public List<BoardResponseDTO> getBoardsList(String sport, String league) {
-        return boardRepository.findBoardsDynamic(sport, league);
+   public List<BoardResponseDTO> getBoardsList(String sport, String league) {
+    String sportdb = switch (sport) {
+        case "soccer" -> "축구";
+        case "baseball" -> "야구";
+        case "mma" -> "MM";
+        default -> "al";
+    };
+
+    String leaguedb = switch (league) {
+        case "laliga" -> "1";
+        case "ucl" -> "2";
+        case "epl" -> "3";
+        case "kbo" -> "4";
+        case "ufc" -> "5";
+        default -> "0";
+    };
+    String categoryIdx = sportdb + leaguedb;
+
+
+List<BoardResponseDTO> boards = boardRepository.findBoardsDynamic(categoryIdx);
+
+    // Base64 변환은 서비스에서 처리
+    for (BoardResponseDTO dto : boards) {
+        Media media = mediaRepository.findFirstByBoardId(dto.getBoardId());
+        if (media != null) {
+            dto.setFileData(BoardResponseDTO.convertFileDataToBase64(media));
+        }
+    }
+
+    return boards;
     }
 }
 
