@@ -26,10 +26,28 @@ public class CommentService {
         return commentRepository.save(comment);
     }
 
-    // 게시글별 댓글 조회
+    // 대댓글 작성
+    @Transactional
+    public Comment writeReply(Board board, User user, Comment parent, String content) {
+        Comment reply = Comment.builder()
+                .board(board)
+                .user(user)
+                .parent(parent)  // ✅ 부모 댓글 연결
+                .content(content)
+                .build();
+        return commentRepository.save(reply);
+    }
+
+    // 게시글별 댓글 조회 (최상위 댓글만)
     @Transactional(readOnly = true)
     public List<Comment> getComments(Board board) {
-        return commentRepository.findByBoardOrderByCreatedAtAsc(board);
+        return commentRepository.findByBoardAndParentIsNullOrderByCreatedAtAsc(board);
+    }
+
+    // 특정 댓글의 대댓글 조회
+    @Transactional(readOnly = true)
+    public List<Comment> getReplies(Comment parent) {
+        return commentRepository.findByParentOrderByCreatedAtAsc(parent);
     }
 
     // 유저별 댓글 조회
