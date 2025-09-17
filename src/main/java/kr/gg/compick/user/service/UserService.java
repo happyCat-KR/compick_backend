@@ -181,7 +181,7 @@ public class UserService {
     public void deleteUser(Long userIdx) {
        
             // 1. 유저 관련 데이터 삭제 (순서 중요!)
-            boardLikeRepository.deleteByUserIdx(userIdx);
+            boardLikeRepository.deleteByUser_UserIdx(userIdx);
             // voteRepository.deleteByUserId(userId);
             // commentRepository.deleteByUserId(userId);
             boardRepository.deleteByUser_UserIdx(userIdx);

@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartRequest;
 
 import kr.gg.compick.board.dto.BoardRegistDTO;
 import kr.gg.compick.board.dto.BoardResponseDTO;
+import kr.gg.compick.board.dto.LikeResponseDTO;
 import kr.gg.compick.board.service.BoardLikeService;
 import kr.gg.compick.board.service.BoardService;
 import kr.gg.compick.domain.User;
@@ -53,44 +54,41 @@ public class BoardController {
     }
 
 
-    @PostMapping("/{boardId}/like")
-    public ResponseEntity<?> toggleLike(
+  @PostMapping("/like/{boardId}")
+    public ResponseEntity<LikeResponseDTO> toggleLike(
             @AuthenticationPrincipal UserDetailsImpl principal,
             @PathVariable Long boardId
     ) {
         Long userIdx = principal.getUser().getUserIdx();
-        boolean liked = boardLikeService.toggleLike(boardId, userIdx);
-        long count = boardLikeService.countLikes(boardId);
-
-        return ResponseEntity.ok(Map.of(
-                "liked", liked,
-                "likeCount", count
-        ));
+        LikeResponseDTO response = boardLikeService.toggleLike(boardId, userIdx);
+        return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{boardId}/like/count")
-    public ResponseEntity<?> getLikeCount(@PathVariable Long boardId) {
+    @GetMapping("/like/{boardId}")
+    public ResponseEntity<Map<String, Object>> getLikeCount(@PathVariable Long boardId) {
         long count = boardLikeService.countLikes(boardId);
-        return ResponseEntity.ok(Map.of("likeCount", count));
+        return ResponseEntity.ok(Map.of("boardId", boardId, "likeCount", count));
     }
+
 
  @GetMapping("/list")
     public ResponseEntity<ResponseData> getBoardList(
             @RequestParam(required = false) String sport,
             @RequestParam(required = false) String league
     ) {
-        //List<BoardResponseDTO> boards = boardService.getBoardsList(sport, league);
-        return ResponseEntity.ok(ResponseData.success());
+        List<BoardResponseDTO> boards = boardService.getBoardsList(sport, league);
+        return ResponseEntity.ok(ResponseData.success(boards));
     }
-    // @GetMapping("/{boardId}")
-    // public ResponseEntity<BoardResponseDTO> getBoardDetail(@PathVariable Long boardId) {
-    //     BoardResponseDTO dto = boardService.getBoardDetail(boardId);
-    //     return ResponseEntity.ok(dto);
-    // }
+    @GetMapping("/detail/{boardId}")
+    public BoardResponseDTO getBoardDetail(@PathVariable Long boardId) {
+        
+        return boardService.getBoardDetail(boardId, null);
+    }
    
 
     @PostMapping("/image/regist")
     public void imageRegist(MultipartRequest req) {
-        System.out.println("너 왔니~");
+        
     }
+
 }
