@@ -44,8 +44,31 @@ GROUP BY bo.boardId, u.userNickname, u.profileImage, bo.title, bo.content,
 """)
 List<BoardResponseDTO> findBoardsDynamic(@Param("categoryIdx") String categoryIdx);
 
-
-
+//전체 조회
+@Query("""
+SELECT new kr.gg.compick.board.dto.BoardResponseDTO(
+    bo.boardId,
+    u.userNickname,
+    u.profileImage,
+    bo.title,
+    bo.content,
+    me.fileUrl,
+    null,
+    bo.createdAt,
+    c.sport.sportName,
+    c.league.leagueNickname,
+    COUNT(bl),
+    false
+)
+FROM Board bo
+JOIN bo.user u
+JOIN bo.category c
+LEFT JOIN bo.mediaList me
+LEFT JOIN BoardLike bl ON bl.board = bo AND bl.delCheck = false
+GROUP BY bo.boardId, u.userNickname, u.profileImage, bo.title, bo.content,
+         me.fileUrl, bo.createdAt, c.sport.sportName, c.league.leagueNickname
+""")
+List<BoardResponseDTO> findAllBoards();
 
      @Modifying
     @Transactional

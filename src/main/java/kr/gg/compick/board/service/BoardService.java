@@ -3,10 +3,12 @@ package kr.gg.compick.board.service;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
+import kr.gg.compick.board.dao.BoardLikeRepository;
 import kr.gg.compick.board.dao.BoardRepository;
 import kr.gg.compick.board.dto.BoardRegistDTO;
 import kr.gg.compick.board.dto.BoardResponseDTO;
@@ -31,7 +33,7 @@ import lombok.RequiredArgsConstructor;
 public class BoardService {
 
     private final UserRepository userRepository;
-    private final MatchtagRepository matchtagRepository;
+    private final BoardLikeRepository boardLikeRepository;
     private final MediaRepository mediaRepository;
     private final MatchRepository matchRepository;
     private final BoardRepository boardRepository;
@@ -56,17 +58,38 @@ public class BoardService {
             .build();
             
     }    
-    // @Transactional
-    // public BoardResponseDTO getBoardDetail(Long boardId) {
-    //     // ✅ 조회수 증가
-    //     boardRepository.incrementViews(boardId);
+    @Transactional
+    public BoardResponseDTO getBoardDetail(Long boardId, Long currentUserId) {
+        // ✅ 조회수 증가
+        boardRepository.incrementViews(boardId);
 
-    //     // ✅ 게시글 상세 조회
-    //     Board board = boardRepository.findById(boardId)
-    //                       .orElseThrow(() -> new RuntimeException("게시글 없음"));
+        // ✅ 게시글 엔티티 조회
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new RuntimeException("게시글 없음"));
 
-    //     return new BoardResponseDTO(board);
-    // }
+        // ✅ DTO 변환
+        BoardResponseDTO dto = BoardResponseDTO.fromEntity(board);
+
+        // ✅ 미디어 처리
+        mediaRepository.findFirstByBoard_BoardId(boardId)
+                .ifPresent(media -> dto.setFileData(BoardResponseDTO.convertFileDataToBase64(media)));
+
+        // ✅ 좋아요 개수
+        Long likeCount = boardLikeRepository.countByBoard_BoardIdAndDelCheckFalse(boardId);
+        dto.setLikeCount(likeCount);
+        System.out.println("[ 좋아요]: "+likeCount);
+
+        // ✅ 내가 좋아요 눌렀는지 여부
+        if (currentUserId != null) {
+            boolean likedByMe = boardLikeRepository
+                    .findByBoard_BoardIdAndUser_UserIdx(boardId, currentUserId)
+                    .map(like -> !like.isDelCheck())
+                    .orElse(false);
+            dto.setLikedByMe(likedByMe);
+        }
+
+        return dto;
+    }
 
     /*
      * 게시글 작성
@@ -95,40 +118,46 @@ public ResponseData<?> boardRegist(BoardRegistDTO dto) throws IOException {
     return ResponseData.success("게시글 등록 성공", savedBoard.getBoardId());
 }
 
-    /*
+
     // 게시글 조회 
    public List<BoardResponseDTO> getBoardsList(String sport, String league) {
-    String sportdb = switch (sport) {
-        case "soccer" -> "축구";
-        case "baseball" -> "야구";
-        case "mma" -> "MM";
-        default -> "al";
-    };
+    // sport 매핑
+    String sportdb = null;
+    if ("soccer".equals(sport)) sportdb = "축구";
+    else if ("baseball".equals(sport)) sportdb = "야구";
+    else if ("mma".equals(sport)) sportdb = "MM";
 
-    String leaguedb = switch (league) {
-        case "laliga" -> "1";
-        case "ucl" -> "2";
-        case "epl" -> "3";
-        case "kbo" -> "4";
-        case "ufc" -> "5";
-        default -> "0";
-    };
-    String categoryIdx = sportdb + leaguedb;
+    // league 매핑
+    String leaguedb = null;
+    if ("laliga".equals(league)) leaguedb = "1";
+    else if ("ucl".equals(league)) leaguedb = "2";
+    else if ("epl".equals(league)) leaguedb = "3";
+    else if ("kbo".equals(league)) leaguedb = "4";
+    else if ("ufc".equals(league)) leaguedb = "5";
 
+    String categoryIdx = (sportdb != null ? sportdb : "") + (leaguedb != null ? leaguedb : "");
 
-List<BoardResponseDTO> boards = boardRepository.findBoardsDynamic(categoryIdx);
+    // categoryIdx가 없으면 전체 조회
+    List<BoardResponseDTO> boards;
+    if (categoryIdx.isEmpty()) {
+        boards = boardRepository.findAllBoards();
+    } else {
+        boards = boardRepository.findBoardsDynamic(categoryIdx);
+    }
 
-    // Base64 변환은 서비스에서 처리
+    // DTO 가공
     for (BoardResponseDTO dto : boards) {
-        Media media = mediaRepository.findFirstByBoardId(dto.getBoardId());
-        if (media != null) {
-            dto.setFileData(BoardResponseDTO.convertFileDataToBase64(media));
-        }
+        mediaRepository.findFirstByBoard_BoardId(dto.getBoardId())
+                .ifPresent(media -> dto.setFileData(BoardResponseDTO.convertFileDataToBase64(media)));
+
+        Long likeCount = boardLikeRepository.countByBoard_BoardIdAndDelCheckFalse(dto.getBoardId());
+        dto.setLikeCount(likeCount);
+
+        dto.setLikedByMe(null); // 로그인 안 한 경우
     }
 
     return boards;
     }
-     */
 }
 
     // @Transactional

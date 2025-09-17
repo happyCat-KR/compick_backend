@@ -1,10 +1,15 @@
 package kr.gg.compick.domain.board;
 
-import lombok.*;
 
 import java.io.Serializable;
 import java.util.Objects;
 
+import jakarta.persistence.Embeddable;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Embeddable
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -1,10 +1,20 @@
 package kr.gg.compick.board.service;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.gg.compick.board.dao.BoardLikeRepository;
+import kr.gg.compick.board.dao.BoardRepository;
+import kr.gg.compick.board.dto.LikeResponseDTO;
+import kr.gg.compick.domain.User;
+import kr.gg.compick.domain.board.Board;
 import kr.gg.compick.domain.board.BoardLike;
+import kr.gg.compick.domain.board.BoardLikeId;
+import kr.gg.compick.user.dao.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -12,45 +22,55 @@ import lombok.RequiredArgsConstructor;
 public class BoardLikeService {
 
     private final BoardLikeRepository boardLikeRepository;
+    private final BoardRepository boardRepository;
+    private final UserRepository userRepository;
+
+   @Transactional
+    public LikeResponseDTO toggleLike(Long boardId, Long userIdx) {
+        Optional<BoardLike> existing = boardLikeRepository.findByBoard_BoardIdAndUser_UserIdx(boardId, userIdx);
+
+        boolean liked;
+        if (existing.isPresent()) {
+            BoardLike like = existing.get();
+            if (!like.isDelCheck()) {
+                like.setDelCheck(true);   // 좋아요 취소
+                liked = false;
+            } else {
+                like.setDelCheck(false);  // 다시 좋아요
+                liked = true;
+            }
+        } else {
+            Board board = boardRepository.findById(boardId)
+                    .orElseThrow(() -> new IllegalArgumentException("게시글 없음"));
+            User user = userRepository.findById(userIdx)
+                    .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
+
+            BoardLike newLike = BoardLike.builder()
+                    .board(board)
+                    .user(user)
+                    .delCheck(false)
+                    .build();
+            boardLikeRepository.save(newLike);
+            liked = true;
+        }
+
+        Long likeCount = boardLikeRepository.countByBoard_BoardIdAndDelCheckFalse(boardId);
+        return new LikeResponseDTO(boardId, liked, likeCount);
+    }
 
     /**
-     * 좋아요 토글 (있으면 취소, 없으면 등록)
+     * ✅ 좋아요 개수 조회 (read-only)
+     */
+    @Transactional(readOnly = true)
+    public Long countLikes(Long boardId) {
+        return boardLikeRepository.countByBoard_BoardIdAndDelCheckFalse(boardId);
+    }
+
+    /**
+     * ✅ 특정 유저가 누른 모든 좋아요 삭제
      */
     @Transactional
-    public boolean toggleLike(Long boardId, Long userIdx) {
-        return boardLikeRepository.findByBoardIdAndUserIdx(boardId, userIdx)
-                .map(like -> {
-                    // 이미 존재하면 delCheck 토글
-                    like.setDelCheck(!like.isDelCheck());
-                    return !like.isDelCheck(); // true = 좋아요 활성 상태
-                })
-                .orElseGet(() -> {
-                    // 없으면 새로 생성
-                    BoardLike newLike = BoardLike.builder()
-                            .boardId(boardId)
-                            .userIdx(userIdx)
-                            .delCheck(false)
-                            .build();
-                    boardLikeRepository.save(newLike);
-                    return true; // 좋아요 활성 상태
-                });
-    }
-
-    /**
-     * 게시글 좋아요 수 조회
-     */
-    @Transactional(readOnly = true)
-    public long countLikes(Long boardId) {
-        return boardLikeRepository.countByBoardIdAndDelCheckFalse(boardId);
-    }
-
-    /**
-     * 특정 사용자가 좋아요 눌렀는지 확인
-     */
-    @Transactional(readOnly = true)
-    public boolean isLikedByUser(Long boardId, Long userIdx) {
-        return boardLikeRepository.findByBoardIdAndUserIdx(boardId, userIdx)
-                .map(like -> !like.isDelCheck())
-                .orElse(false);
+    public void deleteLikesByUser(Long userIdx) {
+        boardLikeRepository.deleteByUser_UserIdx(userIdx);
     }
 }

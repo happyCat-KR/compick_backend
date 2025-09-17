@@ -11,13 +11,13 @@ import kr.gg.compick.domain.board.BoardLikeId;
 
 public interface BoardLikeRepository extends JpaRepository<BoardLike, BoardLikeId> {
 
-    Optional<BoardLike> findByBoardIdAndUserIdx(Long boardId, Long userIdx);
+     Optional<BoardLike> findByBoard_BoardIdAndUser_UserIdx(Long boardId, Long userIdx);
+   
+    Long countByBoard_BoardIdAndDelCheckFalse(Long boardId);
     
-
     @Modifying
     @Transactional
-    void deleteByUserIdx(Long userIdx);
+    void deleteByUser_UserIdx(Long userIdx);
     // User 엔티티의 userId 기준으로 삭제
 
-    long countByBoardIdAndDelCheckFalse(Long boardId);
 }

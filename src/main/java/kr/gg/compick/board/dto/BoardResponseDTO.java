@@ -5,6 +5,7 @@ import java.util.Base64;
 import java.util.List;
 
 import kr.gg.compick.domain.Media;
+import kr.gg.compick.domain.board.Board;
 import kr.gg.compick.match.dto.MatchTagDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -63,4 +64,21 @@ public class BoardResponseDTO {
         }
         return null;
     }
+    public static BoardResponseDTO fromEntity(Board board) {
+    return new BoardResponseDTO(
+            board.getBoardId(),
+            board.getUser().getUserNickname(),
+            board.getUser().getProfileImage(),
+            board.getTitle(),
+            board.getContent(),
+            null,   // fileUrl → Media에서 처리
+            null,   // fileData → Base64 변환 별도 처리
+            board.getCreatedAt(),
+            board.getCategory().getSport().getSportName(),
+            board.getCategory().getLeague().getLeagueNickname(),
+            0L,     // likeCount는 서비스에서 세팅
+            false   // likedByMe도 서비스에서 세팅
+    );
+}
+
 }
