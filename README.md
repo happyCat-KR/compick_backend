@@ -1,3 +1,8 @@
+## 관련 저장소
+- Frontend (React): https://github.com/compick/compick_frontend.git
+- WebSocket Server: https://github.com/happyCat-KR/compick_websocket.git
+- Crawling (Python): https://github.com/happyCat-KR/compick_crawling.git
+
 # Compick Backend
 
 스포츠 경기 정보를 제공하는 Spring Boot 백엔드 애플리케이션입니다.
