@@ -1,7 +1,8 @@
 ## 관련 저장소
-- Frontend (React): https://github.com/compick/compick_frontend.git
-- WebSocket Server: https://github.com/happyCat-KR/compick_websocket.git
-- Crawling (Python): https://github.com/happyCat-KR/compick_crawling.git
+- Frontend (React): https://github.com/compick/edu-bit-proj-compick-frontend.git
+- WebSocket Server: https://github.com/happyCat-KR/edu-bit-proj-compick-websocket.git
+- Crawling (Python): https://github.com/happyCat-KR/edu-bit-proj-compick-crawling.git
+
 
 # Compick Backend
 
